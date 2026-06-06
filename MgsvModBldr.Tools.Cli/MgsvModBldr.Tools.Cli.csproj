@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <RootNamespace>MgsvModBldr.Tools.Cli</RootNamespace>
+    <AssemblyName>MgsvModBldr.Tools.Cli</AssemblyName>
+  </PropertyGroup>
+  <!-- Wrapper DLL: dispatches to every per-tool DLL. Each tool lives in
+       its own project/DLL (folder name == DLL name) so the toolset is
+       modular. The thin modbldr-tools.exe launcher forwards argv here. -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\mgsv_modbldr\csgui\MgsvModBldr.Core\MgsvModBldr.Core.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.GameHashing\MgsvModBldr.Tools.GameHashing.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.Fsop\MgsvModBldr.Tools.Fsop.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.Ftex\MgsvModBldr.Tools.Ftex.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.Fox\MgsvModBldr.Tools.Fox.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.Qar\MgsvModBldr.Tools.Qar.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.Fpk\MgsvModBldr.Tools.Fpk.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.Pftxs\MgsvModBldr.Tools.Pftxs.csproj" />
+  </ItemGroup>
+</Project>

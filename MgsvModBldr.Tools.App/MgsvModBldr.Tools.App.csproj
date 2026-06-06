@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <RootNamespace>MgsvModBldr.Tools.App</RootNamespace>
+    <AssemblyName>modbldr-tools</AssemblyName>
+  </PropertyGroup>
+  <!-- Wrapper executable. Forwards argv to the wrapper DLL. -->
+  <ItemGroup>
+    <ProjectReference Include="..\MgsvModBldr.Tools.Cli\MgsvModBldr.Tools.Cli.csproj" />
+  </ItemGroup>
+  <!-- Ship the dictionary as a loose file next to the exe (never embedded
+       so it can be updated independently). All tools resolve it via
+       AppContext.BaseDirectory. -->
+  <ItemGroup>
+    <None Include="..\qar_dictionary.txt" Link="qar_dictionary.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+</Project>

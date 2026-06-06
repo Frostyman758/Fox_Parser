@@ -1,0 +1,17 @@
+# Build artefacts
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.pdb
+
+# Toolset build output (regenerable via dotnet publish MgsvModBldr.Tools.App)
+dist/
+tools/
+
+# Test fixtures / built outputs
+*.mgsv
+
+# Scratch test/verification projects
+_hashtest/
