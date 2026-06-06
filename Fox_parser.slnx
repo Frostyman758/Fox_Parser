@@ -11,6 +11,7 @@
   <Project Path="MgsvModBldr.Tools.Fpk/MgsvModBldr.Tools.Fpk.csproj" />
   <Project Path="MgsvModBldr.Tools.Pftxs/MgsvModBldr.Tools.Pftxs.csproj" />
   <Project Path="MgsvModBldr.Tools.Translation/MgsvModBldr.Tools.Translation.csproj" />
+  <Project Path="MgsvModBldr.Tools.Twpf/MgsvModBldr.Tools.Twpf.csproj" />
   <Project Path="MgsvModBldr.Tools.Cli/MgsvModBldr.Tools.Cli.csproj" />
   <Project Path="MgsvModBldr.Tools.App/MgsvModBldr.Tools.App.csproj" />
   <!-- Shared test harness + per-tool test suites. -->
@@ -22,5 +23,6 @@
   <Project Path="MgsvModBldr.Tools.Fpk.Tests/MgsvModBldr.Tools.Fpk.Tests.csproj" />
   <Project Path="MgsvModBldr.Tools.Pftxs.Tests/MgsvModBldr.Tools.Pftxs.Tests.csproj" />
   <Project Path="MgsvModBldr.Tools.Translation.Tests/MgsvModBldr.Tools.Translation.Tests.csproj" />
+  <Project Path="MgsvModBldr.Tools.Twpf.Tests/MgsvModBldr.Tools.Twpf.Tests.csproj" />
   <Project Path="../mgsv_modbldr/csgui/MgsvModBldr.Core/MgsvModBldr.Core.csproj" />
 </Solution>

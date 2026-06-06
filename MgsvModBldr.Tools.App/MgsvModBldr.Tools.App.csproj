@@ -18,5 +18,8 @@
     <None Include="..\qar_dictionary.txt" Link="qar_dictionary.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="..\twpf_stringId_dictionary.txt" Link="twpf_stringId_dictionary.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

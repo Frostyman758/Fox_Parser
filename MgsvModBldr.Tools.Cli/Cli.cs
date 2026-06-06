@@ -5,6 +5,7 @@ using MgsvModBldr.Tools.Fsop;
 using MgsvModBldr.Tools.Ftex;
 using MgsvModBldr.Tools.Qar;
 using MgsvModBldr.Tools.Translation;
+using MgsvModBldr.Tools.Twpf;
 using MgsvModBldr.Tools.Tests;
 
 namespace MgsvModBldr.Tools.Cli;
@@ -138,13 +139,16 @@ public static class Cli
         var ext = Path.GetExtension(input).ToLowerInvariant();
         if (ext == ".xml")
         {
-            // Format-suffixed companion (like .fpk.json) — route before Fox's bare .xml.
+            // Format-suffixed companions (like .fpk.json) — route before Fox's bare .xml.
             if (input.EndsWith(".subp.xml", StringComparison.OrdinalIgnoreCase))
             { var p = SubpConverter.Pack(input); Console.WriteLine($"Packed    {input} -> {p}"); return 0; }
+            if (input.EndsWith(".twpf.xml", StringComparison.OrdinalIgnoreCase))
+            { var p = TwpfConverter.Pack(input); Console.WriteLine($"Packed    {input} -> {p}"); return 0; }
             return roundtrip ? RoundtripFoxFromXml(input) : CompileFox(input);
         }
 
         if (ext == ".subp") { var p = SubpConverter.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }
+        if (ext == ".twpf") { var p = TwpfConverter.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }
 
         if (FoxPacker.DecompilableExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase))
             return roundtrip ? RoundtripFox(input) : DecompileFox(input);
