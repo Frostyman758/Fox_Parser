@@ -91,43 +91,82 @@ public sealed class LangTests : IToolTests
                         .ToList();
     }
 
+    // .lng/.lng2 live inside FPK/FPKDs (Assets\tpp\lang\ui\...). The mod
+    // builder leaves extracted copies in its tmp dir; harvest from there
+    // (env LNG_SAMPLES_DIR) or from a zip (env LNG_SAMPLES_ZIP).
+    private const string DefaultSamplesDir = @"C:\Users\Blue\Downloads\test\tmp";
+    private const int MaxPerExt = 8;
+
     /// <summary>
-    /// Harvest .lng/.lng2 from a zip given by LNG_SAMPLES_ZIP into
-    /// hash-keyed buckets, caching the LangTool reference XML + repack.
+    /// Harvest a diverse spread of .lng + .lng2 into hash-keyed buckets,
+    /// caching the LangTool reference XML + repack for each.
     /// </summary>
     public void Harvest()
     {
         var dst = Path.Combine(FixturesDir, "lng");
         Directory.CreateDirectory(dst);
-
-        var zipPath = Environment.GetEnvironmentVariable("LNG_SAMPLES_ZIP");
-        if (string.IsNullOrWhiteSpace(zipPath) || !File.Exists(zipPath))
-        {
-            Console.WriteLine("  Lng: no LNG_SAMPLES_ZIP set (.lng not loose on Z:\\)");
-            return;
-        }
         try
         {
-            int copied = 0;
-            using (var zip = ZipFile.OpenRead(zipPath))
+            var picks = CollectSamples();
+            if (picks.Count == 0)
             {
-                foreach (var entry in zip.Entries)
-                {
-                    var name = Path.GetFileName(entry.FullName);
-                    if (string.IsNullOrEmpty(name)) continue;
-                    if (!name.EndsWith(".lng", StringComparison.OrdinalIgnoreCase) &&
-                        !name.EndsWith(".lng2", StringComparison.OrdinalIgnoreCase)) continue;
-                    var bucket = Path.Combine(dst, ShortHash(entry.FullName));
-                    Directory.CreateDirectory(bucket);
-                    var local = Path.Combine(bucket, name);
-                    entry.ExtractToFile(local, overwrite: true);
-                    GenerateReference(local);
-                    copied++;
-                }
+                Console.WriteLine("  Lng: no .lng/.lng2 found (set LNG_SAMPLES_DIR or LNG_SAMPLES_ZIP)");
+                return;
             }
-            Console.WriteLine($"  Lng: harvested {copied} sample(s) from {Path.GetFileName(zipPath)} to {dst}");
+            int copied = 0;
+            foreach (var (name, bytes) in picks)
+            {
+                var bucket = Path.Combine(dst, ShortHash(copied + "/" + name));
+                Directory.CreateDirectory(bucket);
+                var local = Path.Combine(bucket, name);
+                File.WriteAllBytes(local, bytes);
+                GenerateReference(local);
+                copied++;
+            }
+            Console.WriteLine($"  Lng: harvested {copied} sample(s) to {dst}");
         }
         catch (Exception ex) { Console.WriteLine($"  Lng harvest failed: {ex.Message}"); }
+    }
+
+    private static List<(string name, byte[] bytes)> CollectSamples()
+    {
+        var rng = new Random();
+        var result = new List<(string, byte[])>();
+
+        var zipPath = Environment.GetEnvironmentVariable("LNG_SAMPLES_ZIP");
+        if (!string.IsNullOrWhiteSpace(zipPath) && File.Exists(zipPath))
+        {
+            using var zip = ZipFile.OpenRead(zipPath);
+            foreach (var ext in new[] { ".lng", ".lng2" })
+            {
+                var hits = zip.Entries
+                    .Where(e => e.Name.EndsWith(ext, StringComparison.OrdinalIgnoreCase))
+                    .OrderBy(_ => rng.Next()).Take(MaxPerExt);
+                foreach (var e in hits)
+                {
+                    using var s = e.Open();
+                    using var ms = new MemoryStream();
+                    s.CopyTo(ms);
+                    result.Add((e.Name, ms.ToArray()));
+                }
+            }
+            return result;
+        }
+
+        var dir = Environment.GetEnvironmentVariable("LNG_SAMPLES_DIR");
+        if (string.IsNullOrWhiteSpace(dir) || !Directory.Exists(dir)) dir = DefaultSamplesDir;
+        if (!Directory.Exists(dir)) return result;
+
+        foreach (var ext in new[] { "*.lng", "*.lng2" })
+        {
+            var hits = EnumerateSafe(dir, ext)
+                .GroupBy(f => Path.GetFileName(f), StringComparer.OrdinalIgnoreCase) // de-dup repeated names across mods
+                .Select(g => g.First())
+                .OrderBy(_ => rng.Next()).Take(MaxPerExt);
+            foreach (var f in hits)
+                result.Add((Path.GetFileName(f), File.ReadAllBytes(f)));
+        }
+        return result;
     }
 
     private static void GenerateReference(string stagedLng)
@@ -163,9 +202,13 @@ public sealed class LangTests : IToolTests
 
     private static void RunRef(string refDll, string arg)
     {
+        // LangTool loads lang_dictionary.txt relative to the WORKING
+        // DIRECTORY, so run it from the oracle's own dir (where the dict
+        // sits). Input/output paths are absolute, so this only affects
+        // dictionary resolution — without it the oracle resolves nothing.
         var psi = new ProcessStartInfo("dotnet", $"\"{refDll}\" \"{arg}\"")
         {
-            WorkingDirectory = Path.GetDirectoryName(arg),
+            WorkingDirectory = Path.GetDirectoryName(refDll),
             RedirectStandardOutput = true, RedirectStandardError = true,
             UseShellExecute = false, CreateNoWindow = true,
         };
