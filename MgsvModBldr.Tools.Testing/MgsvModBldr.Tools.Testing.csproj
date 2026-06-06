@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <RootNamespace>MgsvModBldr.Tools.Testing</RootNamespace>
+    <AssemblyName>MgsvModBldr.Tools.Testing</AssemblyName>
+  </PropertyGroup>
+  <!-- Shared test harness for the per-tool .Tests projects: the
+       IToolTests contract, generic byte-compare/parallel helpers, and
+       environment locators (fixtures dir, datfpk reference). References
+       Core only for the datfpk path stored in builder.xml. -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\mgsv_modbldr\csgui\MgsvModBldr.Core\MgsvModBldr.Core.csproj" />
+  </ItemGroup>
+</Project>

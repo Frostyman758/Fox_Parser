@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <RootNamespace>MgsvModBldr.Tools.Translation</RootNamespace>
+    <AssemblyName>MgsvModBldr.Tools.Translation</AssemblyName>
+  </PropertyGroup>
+  <!-- FoxEngine.TranslationTool port: .subp (subtitles), .ffnt (fonts),
+       .lng (language). Subp uses ISO-8859-5 (rus) which needs the
+       CodePages provider; Latin1/UTF-8 are intrinsic. -->
+  <ItemGroup>
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="9.0.0" />
+  </ItemGroup>
+</Project>

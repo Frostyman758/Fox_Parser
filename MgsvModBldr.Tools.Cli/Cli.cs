@@ -4,6 +4,7 @@ using MgsvModBldr.Tools.Fox;
 using MgsvModBldr.Tools.Fsop;
 using MgsvModBldr.Tools.Ftex;
 using MgsvModBldr.Tools.Qar;
+using MgsvModBldr.Tools.Translation;
 using MgsvModBldr.Tools.Tests;
 
 namespace MgsvModBldr.Tools.Cli;
@@ -112,7 +113,7 @@ public static class Cli
         Console.WriteLine("  tools.exe <file>           Auto-detect by extension and convert.");
         Console.WriteLine("  tools.exe --roundtrip <f>  <op>-><inverse> and SHA-check (PASS only for deterministic refs).");
         Console.WriteLine("  tools.exe test             Run automated regression on cached fixtures.");
-        Console.WriteLine("  tools.exe test <tool>      Same, but only for one tool (fsop|fox|ftex).");
+        Console.WriteLine("  tools.exe test <tool>      Same, but only for one tool (fsop|fox|ftex|qar|fpk|pftxs|subp).");
         Console.WriteLine("  tools.exe test --harvest   Refresh fixtures from Z:\\ first (needs datfpk in builder.xml).");
         Console.WriteLine("  tools.exe test <tool> --harvest   Refresh just that tool's fixtures.");
         Console.WriteLine();
@@ -122,6 +123,8 @@ public static class Cli
         Console.WriteLine("  *.xml                       -> writes the stripped-extension binary back");
         Console.WriteLine("  .fsop                       -> writes <basename>_unpacked/  with metadata.json + .fxc files");
         Console.WriteLine("  any folder with metadata.json   -> writes <basename>.fsop  next to the folder");
+        Console.WriteLine("  .subp                       -> writes <name>.subp.xml   (decompile subtitle pack)");
+        Console.WriteLine("  *.subp.xml                  -> writes <name>.subp        (recompile)");
     }
 
     private static int Dispatch(string input, bool roundtrip)
@@ -134,7 +137,14 @@ public static class Cli
 
         var ext = Path.GetExtension(input).ToLowerInvariant();
         if (ext == ".xml")
+        {
+            // Format-suffixed companion (like .fpk.json) — route before Fox's bare .xml.
+            if (input.EndsWith(".subp.xml", StringComparison.OrdinalIgnoreCase))
+            { var p = SubpConverter.Pack(input); Console.WriteLine($"Packed    {input} -> {p}"); return 0; }
             return roundtrip ? RoundtripFoxFromXml(input) : CompileFox(input);
+        }
+
+        if (ext == ".subp") { var p = SubpConverter.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }
 
         if (FoxPacker.DecompilableExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase))
             return roundtrip ? RoundtripFox(input) : DecompileFox(input);

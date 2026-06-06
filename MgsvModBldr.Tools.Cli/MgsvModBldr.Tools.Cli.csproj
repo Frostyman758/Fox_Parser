@@ -18,5 +18,19 @@
     <ProjectReference Include="..\MgsvModBldr.Tools.Qar\MgsvModBldr.Tools.Qar.csproj" />
     <ProjectReference Include="..\MgsvModBldr.Tools.Fpk\MgsvModBldr.Tools.Fpk.csproj" />
     <ProjectReference Include="..\MgsvModBldr.Tools.Pftxs\MgsvModBldr.Tools.Pftxs.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.Translation\MgsvModBldr.Tools.Translation.csproj" />
+  </ItemGroup>
+  <!-- Per-tool test suites (the `test` subcommand aggregates these via
+       IToolTests). Each lives next to its tool so a tool can be lifted
+       out with its verification intact. -->
+  <ItemGroup>
+    <ProjectReference Include="..\MgsvModBldr.Tools.Testing\MgsvModBldr.Tools.Testing.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.Fsop.Tests\MgsvModBldr.Tools.Fsop.Tests.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.Fox.Tests\MgsvModBldr.Tools.Fox.Tests.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.Ftex.Tests\MgsvModBldr.Tools.Ftex.Tests.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.Qar.Tests\MgsvModBldr.Tools.Qar.Tests.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.Fpk.Tests\MgsvModBldr.Tools.Fpk.Tests.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.Pftxs.Tests\MgsvModBldr.Tools.Pftxs.Tests.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.Translation.Tests\MgsvModBldr.Tools.Translation.Tests.csproj" />
   </ItemGroup>
 </Project>

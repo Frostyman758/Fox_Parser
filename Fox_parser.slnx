@@ -10,7 +10,17 @@
   <Project Path="MgsvModBldr.Tools.Qar/MgsvModBldr.Tools.Qar.csproj" />
   <Project Path="MgsvModBldr.Tools.Fpk/MgsvModBldr.Tools.Fpk.csproj" />
   <Project Path="MgsvModBldr.Tools.Pftxs/MgsvModBldr.Tools.Pftxs.csproj" />
+  <Project Path="MgsvModBldr.Tools.Translation/MgsvModBldr.Tools.Translation.csproj" />
   <Project Path="MgsvModBldr.Tools.Cli/MgsvModBldr.Tools.Cli.csproj" />
   <Project Path="MgsvModBldr.Tools.App/MgsvModBldr.Tools.App.csproj" />
+  <!-- Shared test harness + per-tool test suites. -->
+  <Project Path="MgsvModBldr.Tools.Testing/MgsvModBldr.Tools.Testing.csproj" />
+  <Project Path="MgsvModBldr.Tools.Fsop.Tests/MgsvModBldr.Tools.Fsop.Tests.csproj" />
+  <Project Path="MgsvModBldr.Tools.Fox.Tests/MgsvModBldr.Tools.Fox.Tests.csproj" />
+  <Project Path="MgsvModBldr.Tools.Ftex.Tests/MgsvModBldr.Tools.Ftex.Tests.csproj" />
+  <Project Path="MgsvModBldr.Tools.Qar.Tests/MgsvModBldr.Tools.Qar.Tests.csproj" />
+  <Project Path="MgsvModBldr.Tools.Fpk.Tests/MgsvModBldr.Tools.Fpk.Tests.csproj" />
+  <Project Path="MgsvModBldr.Tools.Pftxs.Tests/MgsvModBldr.Tools.Pftxs.Tests.csproj" />
+  <Project Path="MgsvModBldr.Tools.Translation.Tests/MgsvModBldr.Tools.Translation.Tests.csproj" />
   <Project Path="../mgsv_modbldr/csgui/MgsvModBldr.Core/MgsvModBldr.Core.csproj" />
 </Solution>
