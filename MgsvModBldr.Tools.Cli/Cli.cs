@@ -114,7 +114,7 @@ public static class Cli
         Console.WriteLine("  tools.exe <file>           Auto-detect by extension and convert.");
         Console.WriteLine("  tools.exe --roundtrip <f>  <op>-><inverse> and SHA-check (PASS only for deterministic refs).");
         Console.WriteLine("  tools.exe test             Run automated regression on cached fixtures.");
-        Console.WriteLine("  tools.exe test <tool>      Same, but only for one tool (fsop|fox|ftex|qar|fpk|pftxs|subp).");
+        Console.WriteLine("  tools.exe test <tool>      Same, but only for one tool (fsop|fox|ftex|qar|fpk|pftxs|subp|ffnt|lng|twpf).");
         Console.WriteLine("  tools.exe test --harvest   Refresh fixtures from Z:\\ first (needs datfpk in builder.xml).");
         Console.WriteLine("  tools.exe test <tool> --harvest   Refresh just that tool's fixtures.");
         Console.WriteLine();
@@ -126,6 +126,12 @@ public static class Cli
         Console.WriteLine("  any folder with metadata.json   -> writes <basename>.fsop  next to the folder");
         Console.WriteLine("  .subp                       -> writes <name>.subp.xml   (decompile subtitle pack)");
         Console.WriteLine("  *.subp.xml                  -> writes <name>.subp        (recompile)");
+        Console.WriteLine("  .twpf                       -> writes <name>.twpf.xml   (decompile weather params)");
+        Console.WriteLine("  *.twpf.xml                  -> writes <name>.twpf        (recompile)");
+        Console.WriteLine("  .ffnt                       -> writes <name>.ffnt.xml + <stem>_N.png  (decompile font)");
+        Console.WriteLine("  *.ffnt.xml                  -> writes <name>.ffnt        (recompile from xml + pngs)");
+        Console.WriteLine("  .lng/.lng2                  -> writes <name>.lng.xml     (decompile language)");
+        Console.WriteLine("  *.lng.xml                   -> writes <name>.lng         (recompile)");
     }
 
     private static int Dispatch(string input, bool roundtrip)
