@@ -144,11 +144,17 @@ public static class Cli
             { var p = SubpConverter.Pack(input); Console.WriteLine($"Packed    {input} -> {p}"); return 0; }
             if (input.EndsWith(".twpf.xml", StringComparison.OrdinalIgnoreCase))
             { var p = TwpfConverter.Pack(input); Console.WriteLine($"Packed    {input} -> {p}"); return 0; }
+            if (input.EndsWith(".ffnt.xml", StringComparison.OrdinalIgnoreCase))
+            { var p = FfntConverter.Pack(input); Console.WriteLine($"Packed    {input} -> {p}"); return 0; }
+            if (input.EndsWith(".lng.xml", StringComparison.OrdinalIgnoreCase) || input.EndsWith(".lng2.xml", StringComparison.OrdinalIgnoreCase))
+            { var p = LangConverter.Pack(input); Console.WriteLine($"Packed    {input} -> {p}"); return 0; }
             return roundtrip ? RoundtripFoxFromXml(input) : CompileFox(input);
         }
 
         if (ext == ".subp") { var p = SubpConverter.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }
         if (ext == ".twpf") { var p = TwpfConverter.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }
+        if (ext == ".ffnt") { var p = FfntConverter.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }
+        if (ext == ".lng" || ext == ".lng2") { var p = LangConverter.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }
 
         if (FoxPacker.DecompilableExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase))
             return roundtrip ? RoundtripFox(input) : DecompileFox(input);

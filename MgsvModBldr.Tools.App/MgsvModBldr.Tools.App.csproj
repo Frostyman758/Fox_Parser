@@ -21,5 +21,8 @@
     <None Include="..\twpf_stringId_dictionary.txt" Link="twpf_stringId_dictionary.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="..\lang_dictionary.txt" Link="lang_dictionary.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>
