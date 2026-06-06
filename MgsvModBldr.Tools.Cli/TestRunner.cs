@@ -30,6 +30,8 @@ public static class TestRunner
         new FpkTests(),
         new PftxsTests(),
         new SubpTests(),
+        new FfntTests(),
+        new LangTests(),
         new TwpfTests(),
     };
 

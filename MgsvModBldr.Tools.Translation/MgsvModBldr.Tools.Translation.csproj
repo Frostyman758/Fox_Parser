@@ -12,4 +12,8 @@
   <ItemGroup>
     <PackageReference Include="System.Text.Encoding.CodePages" Version="9.0.0" />
   </ItemGroup>
+  <!-- Lang (.lng) StrCode32 reuses Core.CityHash64 (== game hashing). -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\mgsv_modbldr\csgui\MgsvModBldr.Core\MgsvModBldr.Core.csproj" />
+  </ItemGroup>
 </Project>
