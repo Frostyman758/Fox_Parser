@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <RootNamespace>MgsvModBldr.Tools.Fv2</RootNamespace>
+    <AssemblyName>MgsvModBldr.Tools.Fv2</AssemblyName>
+  </PropertyGroup>
+  <!-- FvTwool port: .fv2 (fova variation) FORMAT LIB ONLY (the reference
+       is WinForms; UI dropped per user). Cross-platform, no deps. The
+       full Fv2 struct is serialised to XML directly (preserving the
+       unknown indices that FvTwool's named-hash export drops), so the
+       round-trip is byte-exact against the game file. -->
+</Project>

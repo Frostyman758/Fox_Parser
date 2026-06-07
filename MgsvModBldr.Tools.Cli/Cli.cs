@@ -10,6 +10,7 @@ using MgsvModBldr.Tools.Mtar;
 using MgsvModBldr.Tools.Spch;
 using MgsvModBldr.Tools.Tcvp;
 using MgsvModBldr.Tools.Rdf;
+using MgsvModBldr.Tools.Fv2;
 using MgsvModBldr.Tools.Tests;
 
 namespace MgsvModBldr.Tools.Cli;
@@ -168,6 +169,8 @@ public static class Cli
             { var p = TcvpConverter.Pack(input); Console.WriteLine($"Packed    {input} -> {p}"); return 0; }
             if (input.EndsWith(".rdf.xml", StringComparison.OrdinalIgnoreCase))
             { var p = RdfConverter.Pack(input); Console.WriteLine($"Packed    {input} -> {p}"); return 0; }
+            if (input.EndsWith(".fv2.xml", StringComparison.OrdinalIgnoreCase))
+            { var p = Fv2Converter.Pack(input); Console.WriteLine($"Packed    {input} -> {p}"); return 0; }
             return roundtrip ? RoundtripFoxFromXml(input) : CompileFox(input);
         }
 
@@ -179,6 +182,7 @@ public static class Cli
         if (ext == ".spch") { var p = SpchConverter.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }
         if (ext == ".tcvp") { var p = TcvpConverter.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }
         if (ext == ".rdf") { var p = RdfConverter.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }
+        if (ext == ".fv2") { var p = Fv2Converter.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }
 
         if (FoxPacker.DecompilableExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase))
             return roundtrip ? RoundtripFox(input) : DecompileFox(input);
