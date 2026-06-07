@@ -24,5 +24,8 @@
     <None Include="..\lang_dictionary.txt" Link="lang_dictionary.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="..\mtar_dictionary.txt" Link="mtar_dictionary.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

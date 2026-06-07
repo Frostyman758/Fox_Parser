@@ -6,6 +6,7 @@ using MgsvModBldr.Tools.Ftex;
 using MgsvModBldr.Tools.Qar;
 using MgsvModBldr.Tools.Translation;
 using MgsvModBldr.Tools.Twpf;
+using MgsvModBldr.Tools.Mtar;
 using MgsvModBldr.Tools.Tests;
 
 namespace MgsvModBldr.Tools.Cli;
@@ -114,7 +115,7 @@ public static class Cli
         Console.WriteLine("  tools.exe <file>           Auto-detect by extension and convert.");
         Console.WriteLine("  tools.exe --roundtrip <f>  <op>-><inverse> and SHA-check (PASS only for deterministic refs).");
         Console.WriteLine("  tools.exe test             Run automated regression on cached fixtures.");
-        Console.WriteLine("  tools.exe test <tool>      Same, but only for one tool (fsop|fox|ftex|qar|fpk|pftxs|subp|ffnt|lng|twpf).");
+        Console.WriteLine("  tools.exe test <tool>      Same, but only for one tool (fsop|fox|ftex|qar|fpk|pftxs|subp|ffnt|lng|twpf|mtar).");
         Console.WriteLine("  tools.exe test --harvest   Refresh fixtures from Z:\\ first (needs datfpk in builder.xml).");
         Console.WriteLine("  tools.exe test <tool> --harvest   Refresh just that tool's fixtures.");
         Console.WriteLine();
@@ -132,6 +133,8 @@ public static class Cli
         Console.WriteLine("  *.ffnt.xml                  -> writes <name>.ffnt        (recompile from xml + pngs)");
         Console.WriteLine("  .lng/.lng2                  -> writes <name>.lng.xml     (decompile language)");
         Console.WriteLine("  *.lng.xml                   -> writes <name>.lng         (recompile)");
+        Console.WriteLine("  .mtar                       -> writes <name>.mtar.xml + <stem>_mtar/  (decompile motion archive)");
+        Console.WriteLine("  *.mtar.xml                  -> writes <name>.mtar        (recompile from xml + folder)");
     }
 
     private static int Dispatch(string input, bool roundtrip)
@@ -154,6 +157,8 @@ public static class Cli
             { var p = FfntConverter.Pack(input); Console.WriteLine($"Packed    {input} -> {p}"); return 0; }
             if (input.EndsWith(".lng.xml", StringComparison.OrdinalIgnoreCase) || input.EndsWith(".lng2.xml", StringComparison.OrdinalIgnoreCase))
             { var p = LangConverter.Pack(input); Console.WriteLine($"Packed    {input} -> {p}"); return 0; }
+            if (input.EndsWith(".mtar.xml", StringComparison.OrdinalIgnoreCase))
+            { var p = MtarConverter.Pack(input); Console.WriteLine($"Packed    {input} -> {p}"); return 0; }
             return roundtrip ? RoundtripFoxFromXml(input) : CompileFox(input);
         }
 
@@ -161,6 +166,7 @@ public static class Cli
         if (ext == ".twpf") { var p = TwpfConverter.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }
         if (ext == ".ffnt") { var p = FfntConverter.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }
         if (ext == ".lng" || ext == ".lng2") { var p = LangConverter.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }
+        if (ext == ".mtar") { var p = MtarConverter.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }
 
         if (FoxPacker.DecompilableExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase))
             return roundtrip ? RoundtripFox(input) : DecompileFox(input);

@@ -8,6 +8,7 @@ using MgsvModBldr.Tools.Fpk.Tests;
 using MgsvModBldr.Tools.Pftxs.Tests;
 using MgsvModBldr.Tools.Translation.Tests;
 using MgsvModBldr.Tools.Twpf.Tests;
+using MgsvModBldr.Tools.Mtar.Tests;
 
 namespace MgsvModBldr.Tools.Tests;
 
@@ -33,6 +34,7 @@ public static class TestRunner
         new FfntTests(),
         new LangTests(),
         new TwpfTests(),
+        new MtarTests(),
     };
 
     /// <summary>

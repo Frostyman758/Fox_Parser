@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <RootNamespace>MgsvModBldr.Tools.Mtar.Tests</RootNamespace>
+    <AssemblyName>MgsvModBldr.Tools.Mtar.Tests</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MgsvModBldr.Tools.Mtar\MgsvModBldr.Tools.Mtar.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.Testing\MgsvModBldr.Tools.Testing.csproj" />
+  </ItemGroup>
+</Project>
