@@ -11,6 +11,7 @@ using MgsvModBldr.Tools.Spch;
 using MgsvModBldr.Tools.Tcvp;
 using MgsvModBldr.Tools.Rdf;
 using MgsvModBldr.Tools.Fv2;
+using MgsvModBldr.Tools.Hlsl;
 using MgsvModBldr.Tools.Tests;
 
 namespace MgsvModBldr.Tools.Cli;
@@ -82,10 +83,12 @@ public static class Cli
         }
 
         bool roundtrip = false;
+        bool hlslFiles = false;
         var positional = new List<string>();
         foreach (var a in args)
         {
             if (a == "--roundtrip" || a == "-r") roundtrip = true;
+            else if (a == "-files" || a == "-src") hlslFiles = true;
             else positional.Add(a);
         }
 
@@ -104,7 +107,7 @@ public static class Cli
 
         try
         {
-            return Dispatch(input, roundtrip);
+            return Dispatch(input, roundtrip, hlslFiles);
         }
         catch (Exception ex)
         {
@@ -119,7 +122,7 @@ public static class Cli
         Console.WriteLine("  tools.exe <file>           Auto-detect by extension and convert.");
         Console.WriteLine("  tools.exe --roundtrip <f>  <op>-><inverse> and SHA-check (PASS only for deterministic refs).");
         Console.WriteLine("  tools.exe test             Run automated regression on cached fixtures.");
-        Console.WriteLine("  tools.exe test <tool>      Same, but only for one tool (fsop|fox|ftex|qar|fpk|pftxs|subp|ffnt|lng|twpf|mtar).");
+        Console.WriteLine("  tools.exe test <tool>      Same, but only for one tool (fsop|fox|ftex|qar|fpk|pftxs|subp|ffnt|lng|twpf|mtar|spch|tcvp|rdf|fv2|hlsl).");
         Console.WriteLine("  tools.exe test --harvest   Refresh fixtures from Z:\\ first (needs datfpk in builder.xml).");
         Console.WriteLine("  tools.exe test <tool> --harvest   Refresh just that tool's fixtures.");
         Console.WriteLine();
@@ -137,11 +140,14 @@ public static class Cli
         Console.WriteLine("  *.ffnt.xml                  -> writes <name>.ffnt        (recompile from xml + pngs)");
         Console.WriteLine("  .lng/.lng2                  -> writes <name>.lng.xml     (decompile language)");
         Console.WriteLine("  *.lng.xml                   -> writes <name>.lng         (recompile)");
+        Console.WriteLine("  .mtar/.spch/.tcvp/.rdf/.fv2 -> writes <name>.<ext>.xml (+folder for mtar) ; *.<ext>.xml repacks");
+        Console.WriteLine("  .fxc                        -> writes <name>.fxc.hlsl   (extract embedded HLSL source; Shift-JIS comments preserved)");
+        Console.WriteLine("  .fxc -files                 -> writes <name>_src/       (reconstruct the original .shdr/.h source files)");
         Console.WriteLine("  .mtar                       -> writes <name>.mtar.xml + <stem>_mtar/  (decompile motion archive)");
         Console.WriteLine("  *.mtar.xml                  -> writes <name>.mtar        (recompile from xml + folder)");
     }
 
-    private static int Dispatch(string input, bool roundtrip)
+    private static int Dispatch(string input, bool roundtrip, bool hlslFiles = false)
     {
         if (Directory.Exists(input))
         {
@@ -183,6 +189,15 @@ public static class Cli
         if (ext == ".tcvp") { var p = TcvpConverter.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }
         if (ext == ".rdf") { var p = RdfConverter.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }
         if (ext == ".fv2") { var p = Fv2Converter.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }
+        if (ext == ".fxc")
+        {
+            // Default: extract the preprocessed .hlsl. -files: reconstruct the
+            // original .shdr/.h source files into <name>_src/.
+            var p = hlslFiles ? HlslConverter.UnpackFiles(input) : HlslConverter.Unpack(input);
+            if (p is null) { Console.Error.WriteLine($"No embedded HLSL source in {input} (no SDBG chunk)."); return 2; }
+            Console.WriteLine($"Extracted {input} -> {p}");
+            return 0;
+        }
 
         if (FoxPacker.DecompilableExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase))
             return roundtrip ? RoundtripFox(input) : DecompileFox(input);

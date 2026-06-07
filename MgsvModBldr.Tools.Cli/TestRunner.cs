@@ -13,6 +13,7 @@ using MgsvModBldr.Tools.Spch.Tests;
 using MgsvModBldr.Tools.Tcvp.Tests;
 using MgsvModBldr.Tools.Rdf.Tests;
 using MgsvModBldr.Tools.Fv2.Tests;
+using MgsvModBldr.Tools.Hlsl.Tests;
 
 namespace MgsvModBldr.Tools.Tests;
 
@@ -43,6 +44,7 @@ public static class TestRunner
         new TcvpTests(),
         new RdfTests(),
         new Fv2Tests(),
+        new HlslTests(),
     };
 
     /// <summary>

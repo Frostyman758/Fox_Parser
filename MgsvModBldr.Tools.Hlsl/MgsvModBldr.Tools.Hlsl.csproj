@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <RootNamespace>MgsvModBldr.Tools.Hlsl</RootNamespace>
+    <AssemblyName>MgsvModBldr.Tools.Hlsl</AssemblyName>
+  </PropertyGroup>
+  <!-- HLSL tool: extract the embedded HLSL source from MGSV .fxc (DXBC)
+       shaders. The .fxc is a DXBC container whose SDBG debug chunk holds
+       the preprocessed HLSL source (with #line directives). NOTE: unlike
+       the format tools, the recompile half (hlsl -> fxc) is NOT byte-exact
+       (no compiler reproduces the original DXBC) — this is the one
+       sanctioned exception (user). This project currently ships the
+       lossless, cross-platform DECOMPILE (extract source); recompile via
+       DXC is a follow-up. -->
+</Project>
