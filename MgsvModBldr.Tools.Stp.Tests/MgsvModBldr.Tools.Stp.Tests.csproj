@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <RootNamespace>MgsvModBldr.Tools.Stp.Tests</RootNamespace>
+    <AssemblyName>MgsvModBldr.Tools.Stp.Tests</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MgsvModBldr.Tools.Stp\MgsvModBldr.Tools.Stp.csproj" />
+    <!-- Test-only: .stp/.sab samples live inside .sbp, so the harvester
+         unpacks sbp to extract them. -->
+    <ProjectReference Include="..\MgsvModBldr.Tools.Sbp\MgsvModBldr.Tools.Sbp.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.Testing\MgsvModBldr.Tools.Testing.csproj" />
+  </ItemGroup>
+</Project>

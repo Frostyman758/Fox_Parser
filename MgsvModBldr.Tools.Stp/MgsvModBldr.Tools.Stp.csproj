@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>MgsvModBldr.Tools.Stp</RootNamespace>
+    <AssemblyName>MgsvModBldr.Tools.Stp</AssemblyName>
+  </PropertyGroup>
+  <!-- .stp (StreamedPackage: RIFF .wem + TPP .ls2 lipsync) and .sab
+       (StreamedAnimation: .lsst pairs) — flat Fox Engine streamed-audio
+       containers (the sub-files inside an .sbp). Both are lossless ->
+       gate is byte-exact round-trip vs the game file. The reference
+       StpTool rebuilds entry order from Directory.GetFiles (alphabetical),
+       which is NOT byte-exact; we keep an ordered JSON manifest so the
+       round-trip is exact. .bnk is dump-only in the reference (no
+       repacker) and therefore out of scope for a byte-exact tool.
+       Self-contained (no deps); cross-platform. -->
+</Project>

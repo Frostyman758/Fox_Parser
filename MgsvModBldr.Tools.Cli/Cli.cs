@@ -12,6 +12,7 @@ using MgsvModBldr.Tools.Tcvp;
 using MgsvModBldr.Tools.Rdf;
 using MgsvModBldr.Tools.Fv2;
 using MgsvModBldr.Tools.Hlsl;
+using MgsvModBldr.Tools.Stp;
 using MgsvModBldr.Tools.Tests;
 
 namespace MgsvModBldr.Tools.Cli;
@@ -84,11 +85,13 @@ public static class Cli
 
         bool roundtrip = false;
         bool hlslFiles = false;
+        bool stpGz = false;
         var positional = new List<string>();
         foreach (var a in args)
         {
             if (a == "--roundtrip" || a == "-r") roundtrip = true;
             else if (a == "-files" || a == "-src") hlslFiles = true;
+            else if (a == "-gz") stpGz = true; // .stp/.sab GZ version (reference defaults TPP)
             else positional.Add(a);
         }
 
@@ -107,7 +110,7 @@ public static class Cli
 
         try
         {
-            return Dispatch(input, roundtrip, hlslFiles);
+            return Dispatch(input, roundtrip, hlslFiles, stpGz);
         }
         catch (Exception ex)
         {
@@ -150,11 +153,20 @@ public static class Cli
         Console.WriteLine("  *.mtar.xml                  -> writes <name>.mtar        (recompile from xml + folder)");
     }
 
-    private static int Dispatch(string input, bool roundtrip, bool hlslFiles = false)
+    private static int Dispatch(string input, bool roundtrip, bool hlslFiles = false, bool stpGz = false)
     {
         if (Directory.Exists(input))
         {
-            // Folder -> only FSOP pack-mode honours folders right now.
+            // _stp / _sab folders repack via the Stp tool; everything else
+            // is an FSOP unpacked-folder.
+            var trimmed = input.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            if (trimmed.EndsWith("_stp", StringComparison.OrdinalIgnoreCase) ||
+                trimmed.EndsWith("_sab", StringComparison.OrdinalIgnoreCase))
+            {
+                var p = StpPacker.Pack(input, stpGz ? StpVersion.GZ : StpVersion.TPP);
+                Console.WriteLine($"Packed    {input} -> {p}");
+                return 0;
+            }
             return roundtrip ? RoundtripFsop(input) : PackFsop(input);
         }
 
@@ -239,6 +251,8 @@ public static class Cli
         if (ext == ".fpk" || ext == ".fpkd") { var p = MgsvModBldr.Tools.Fpk.FpkPacker.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }
         if (ext == ".json" && (input.EndsWith(".fpk.json", StringComparison.OrdinalIgnoreCase) || input.EndsWith(".fpkd.json", StringComparison.OrdinalIgnoreCase)))
         { var p = MgsvModBldr.Tools.Fpk.FpkPacker.Pack(input); Console.WriteLine($"Packed    {input} -> {p}"); return 0; }
+
+        if (ext == ".stp" || ext == ".sab") { var p = StpPacker.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }
 
         if (ext == ".sbp") { var p = MgsvModBldr.Tools.Sbp.SbpPacker.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }
         if (ext == ".json" && input.EndsWith(".sbp.json", StringComparison.OrdinalIgnoreCase))

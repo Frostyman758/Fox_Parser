@@ -15,6 +15,7 @@ using MgsvModBldr.Tools.Rdf.Tests;
 using MgsvModBldr.Tools.Fv2.Tests;
 using MgsvModBldr.Tools.Hlsl.Tests;
 using MgsvModBldr.Tools.Sbp.Tests;
+using MgsvModBldr.Tools.Stp.Tests;
 
 namespace MgsvModBldr.Tools.Tests;
 
@@ -47,6 +48,7 @@ public static class TestRunner
         new Fv2Tests(),
         new HlslTests(),
         new SbpTests(),
+        new StpTests(),
     };
 
     /// <summary>
