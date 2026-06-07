@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <RootNamespace>MgsvModBldr.Tools.Spch</RootNamespace>
+    <AssemblyName>MgsvModBldr.Tools.Spch</AssemblyName>
+  </PropertyGroup>
+  <!-- SpchTool port: .spch speech tables. StrCode32 reuses Core.CityHash64
+       (== game hashing); FNV1 is self-contained. Ships the spch_*
+       dictionaries loose next to the exe. -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\mgsv_modbldr\csgui\MgsvModBldr.Core\MgsvModBldr.Core.csproj" />
+  </ItemGroup>
+</Project>

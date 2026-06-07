@@ -7,6 +7,7 @@ using MgsvModBldr.Tools.Qar;
 using MgsvModBldr.Tools.Translation;
 using MgsvModBldr.Tools.Twpf;
 using MgsvModBldr.Tools.Mtar;
+using MgsvModBldr.Tools.Spch;
 using MgsvModBldr.Tools.Tests;
 
 namespace MgsvModBldr.Tools.Cli;
@@ -159,6 +160,8 @@ public static class Cli
             { var p = LangConverter.Pack(input); Console.WriteLine($"Packed    {input} -> {p}"); return 0; }
             if (input.EndsWith(".mtar.xml", StringComparison.OrdinalIgnoreCase))
             { var p = MtarConverter.Pack(input); Console.WriteLine($"Packed    {input} -> {p}"); return 0; }
+            if (input.EndsWith(".spch.xml", StringComparison.OrdinalIgnoreCase))
+            { var p = SpchConverter.Pack(input); Console.WriteLine($"Packed    {input} -> {p}"); return 0; }
             return roundtrip ? RoundtripFoxFromXml(input) : CompileFox(input);
         }
 
@@ -167,6 +170,7 @@ public static class Cli
         if (ext == ".ffnt") { var p = FfntConverter.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }
         if (ext == ".lng" || ext == ".lng2") { var p = LangConverter.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }
         if (ext == ".mtar") { var p = MtarConverter.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }
+        if (ext == ".spch") { var p = SpchConverter.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }
 
         if (FoxPacker.DecompilableExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase))
             return roundtrip ? RoundtripFox(input) : DecompileFox(input);

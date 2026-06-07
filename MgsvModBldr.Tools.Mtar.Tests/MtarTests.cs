@@ -177,6 +177,10 @@ public sealed class MtarTests : IToolTests
             UseShellExecute = false, CreateNoWindow = true,
         };
         using var proc = Process.Start(psi);
-        proc?.WaitForExit(60000);
+        // MtarTool spams stdout (per-entry NameResolver logging); drain both
+        // pipes concurrently or the child can block on a full buffer.
+        _ = proc.StandardOutput.ReadToEndAsync();
+        _ = proc.StandardError.ReadToEndAsync();
+        proc.WaitForExit(60000);
     }
 }
