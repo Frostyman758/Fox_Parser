@@ -11,31 +11,34 @@
   <ItemGroup>
     <ProjectReference Include="..\MgsvModBldr.Tools.Cli\MgsvModBldr.Tools.Cli.csproj" />
   </ItemGroup>
-  <!-- Ship the dictionary as a loose file next to the exe (never embedded
-       so it can be updated independently). All tools resolve it via
-       AppContext.BaseDirectory. -->
+  <!-- The fox splash sits loose next to the exe. -->
   <ItemGroup>
     <None Include="..\fox_logo.txt" Link="fox_logo.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\qar_dictionary.txt" Link="qar_dictionary.txt">
+  </ItemGroup>
+  <!-- Dictionaries live in a tidy dict/ folder next to the exe (never
+       embedded, so they can be updated independently). Every tool resolves
+       them from <baseDir>/dict/ (with a loose-beside fallback). -->
+  <ItemGroup>
+    <None Include="..\qar_dictionary.txt" Link="dict\qar_dictionary.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\twpf_stringId_dictionary.txt" Link="twpf_stringId_dictionary.txt">
+    <None Include="..\twpf_stringId_dictionary.txt" Link="dict\twpf_stringId_dictionary.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\lang_dictionary.txt" Link="lang_dictionary.txt">
+    <None Include="..\lang_dictionary.txt" Link="dict\lang_dictionary.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\mtar_dictionary.txt" Link="mtar_dictionary.txt">
+    <None Include="..\mtar_dictionary.txt" Link="dict\mtar_dictionary.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="..\spch_*dictionary.txt">
-      <Link>%(Filename)%(Extension)</Link>
+      <Link>dict\%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="..\rdf_*_dictionary.txt">
-      <Link>%(Filename)%(Extension)</Link>
+      <Link>dict\%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

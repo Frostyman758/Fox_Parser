@@ -57,9 +57,16 @@ public static class FoxPacker
 
     private static string DefaultDictionaryPath()
     {
-        var beside = Path.Combine(AppContext.BaseDirectory, DictionaryFileName);
-        if (File.Exists(beside)) return beside;
-        return Path.Combine(Directory.GetCurrentDirectory(), DictionaryFileName);
+        // dict/ folder next to the exe, with loose-beside / CWD fallbacks.
+        foreach (var p in new[]
+        {
+            Path.Combine(AppContext.BaseDirectory, "dict", DictionaryFileName),
+            Path.Combine(AppContext.BaseDirectory, DictionaryFileName),
+            Path.Combine(Directory.GetCurrentDirectory(), "dict", DictionaryFileName),
+            Path.Combine(Directory.GetCurrentDirectory(), DictionaryFileName),
+        })
+            if (File.Exists(p)) return p;
+        return Path.Combine(AppContext.BaseDirectory, "dict", DictionaryFileName);
     }
 
     private static Dictionary<ulong, string> LoadDictionary()

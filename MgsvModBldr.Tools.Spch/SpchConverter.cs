@@ -39,12 +39,18 @@ public static class SpchConverter
         return hm;
     }
 
+    private static string ResolveDict(string name)
+    {
+        var inDict = Path.Combine(AppContext.BaseDirectory, "dict", name);
+        return File.Exists(inDict) ? inDict : Path.Combine(AppContext.BaseDirectory, name);
+    }
+
     private static Dictionary<uint, string> BuildTable(string[] names, Func<string, uint> hash)
     {
         var literals = new List<string>();
         foreach (var n in names)
         {
-            var path = Path.Combine(AppContext.BaseDirectory, n);
+            var path = ResolveDict(n);
             if (File.Exists(path))
                 literals.AddRange(File.ReadAllLines(path));
         }

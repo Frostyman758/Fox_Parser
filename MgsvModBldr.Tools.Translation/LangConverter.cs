@@ -18,10 +18,16 @@ public static class LangConverter
     private const string DictName = "lang_dictionary.txt";
 
     /// <summary>Build langIdCode→string lookup from the loose dictionary (if present).</summary>
+    private static string ResolveDict(string name)
+    {
+        var inDict = Path.Combine(AppContext.BaseDirectory, "dict", name);
+        return File.Exists(inDict) ? inDict : Path.Combine(AppContext.BaseDirectory, name);
+    }
+
     public static Dictionary<uint, string> LoadDictionary()
     {
         var dict = new Dictionary<uint, string>();
-        var path = Path.Combine(AppContext.BaseDirectory, DictName);
+        var path = ResolveDict(DictName);
         if (File.Exists(path))
             foreach (var value in File.ReadAllLines(path))
                 dict[Fox.GetStrCode32(value)] = value;

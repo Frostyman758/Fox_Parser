@@ -23,10 +23,16 @@ public static class TwpfConverter
     }
 
     /// <summary>Build hash→string lookup from the loose dictionary (if present).</summary>
+    private static string ResolveDict(string name)
+    {
+        var inDict = Path.Combine(AppContext.BaseDirectory, "dict", name);
+        return File.Exists(inDict) ? inDict : Path.Combine(AppContext.BaseDirectory, name);
+    }
+
     public static Dictionary<ulong, string> LoadDictionary()
     {
         var dict = new Dictionary<ulong, string>();
-        var path = Path.Combine(AppContext.BaseDirectory, DictName);
+        var path = ResolveDict(DictName);
         if (File.Exists(path))
             foreach (var key in File.ReadAllLines(path))
                 dict[TwpParamKeyStringId.StrCode(key)] = key;

@@ -145,7 +145,9 @@ public sealed class RdfTests : IToolTests
             // resolution. Restore the canonical (shipped) user dict before
             // each run so the oracle matches our tool deterministically.
             var refDir = Path.GetDirectoryName(refDll)!;
-            var canonicalUserDict = Path.Combine(AppContext.BaseDirectory, "rdf_user_dictionary.txt");
+            var canonicalUserDict = Path.Combine(AppContext.BaseDirectory, "dict", "rdf_user_dictionary.txt");
+            if (!File.Exists(canonicalUserDict)) // back-compat: loose beside the exe
+                canonicalUserDict = Path.Combine(AppContext.BaseDirectory, "rdf_user_dictionary.txt");
             if (File.Exists(canonicalUserDict))
                 File.Copy(canonicalUserDict, Path.Combine(refDir, "rdf_user_dictionary.txt"), overwrite: true);
 

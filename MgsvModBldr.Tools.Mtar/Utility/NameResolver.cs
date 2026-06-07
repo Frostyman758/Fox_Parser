@@ -18,10 +18,16 @@ namespace MgsvModBldr.Tools.Mtar.Utility
 
         private static readonly Dictionary<string, string> hashToName = LoadDictionary();
 
+        private static string ResolveDict(string name)
+        {
+            var inDict = Path.Combine(AppContext.BaseDirectory, "dict", name);
+            return File.Exists(inDict) ? inDict : Path.Combine(AppContext.BaseDirectory, name);
+        }
+
         private static Dictionary<string, string> LoadDictionary()
         {
             var map = new Dictionary<string, string>();
-            var path = Path.Combine(AppContext.BaseDirectory, "mtar_dictionary.txt");
+            var path = ResolveDict("mtar_dictionary.txt");
             if (!File.Exists(path)) return map;
             foreach (var line in File.ReadAllLines(path))
             {
