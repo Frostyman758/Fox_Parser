@@ -48,10 +48,24 @@ public static class HlslConverter
         if (start < 0) start = IndexOf(fxc, "#line ", off, payEnd); // fallback: whole chunk
         if (start < 0) return null;
 
-        // The source is one NUL-terminated string. NUL never appears inside
-        // HLSL text (incl. Shift-JIS), so this captures it fully + intact.
-        int end = start;
-        while (end < payEnd && fxc[end] != 0) end++;
+        // End of source: in the SDBG heap the source text is followed by a
+        // packed symbol-name table — a very long run of identifier chars
+        // (letters/digits/_/:) with NO whitespace and NO NUL. Real HLSL has
+        // newlines+spaces every few dozen chars, so we end the source at the
+        // last newline before any 400+ char whitespace-free run (a NUL also
+        // ends it). This keeps Shift-JIS comments (which contain spaces/
+        // newlines around them) while cutting the trailing symbol blob.
+        int end = payEnd;
+        int lastNl = -1;
+        int runStart = start;
+        for (int p = start; p < payEnd; p++)
+        {
+            byte c = fxc[p];
+            if (c == 0) { end = p; break; }
+            if (c == 0x0A) lastNl = p;
+            if (c == 0x20 || c == 0x09 || c == 0x0A || c == 0x0D) runStart = p + 1;
+            else if (p - runStart >= 400) { end = lastNl >= start ? lastNl : p; break; }
+        }
 
         var bytes = new byte[end - start];
         Buffer.BlockCopy(fxc, start, bytes, 0, bytes.Length);
@@ -61,12 +75,73 @@ public static class HlslConverter
     /// <summary>Decompile a .fxc to <c>&lt;name&gt;.fxc.hlsl</c> (raw bytes; Japanese preserved). Null if no source.</summary>
     public static string Unpack(string fxcPath)
     {
-        var src = ExtractSourceBytes(File.ReadAllBytes(fxcPath));
+        var fxc = File.ReadAllBytes(fxcPath);
+        var src = ExtractSourceBytes(fxc);
         if (src is null) return null;
         var outPath = fxcPath + ".hlsl";
-        File.WriteAllBytes(outPath, src);
+        // Prepend a recompile directive (a comment the compiler ignores) so
+        // the .hlsl is self-contained for hlsl->fxc: target/entry/flags.
+        var (entry, target) = StageInfo(fxcPath);
+        // Konami's stored SDBG compile flags (0x505) aren't valid D3DCompile
+        // Flags1; the original set no matrix-packing bit (= column-major,
+        // the D3DCompile default), so flags=0 reproduces correct packing and
+        // a game-loadable shader. (Editable in the directive below.)
+        uint flags = 0;
+        var directive = Encoding.ASCII.GetBytes($"//FXC target={target} entry={entry} flags=0x{flags:X8}\r\n");
+        using var fs = File.Open(outPath, FileMode.Create, FileAccess.Write, FileShare.None);
+        fs.Write(directive, 0, directive.Length);
+        fs.Write(src, 0, src.Length);
         return outPath;
     }
+
+    /// <summary>
+    /// Recompile a <c>&lt;name&gt;.fxc.hlsl</c> back to <c>&lt;name&gt;.fxc</c> via D3DCompile.
+    /// Functional (game-loadable SM5 DXBC), NOT byte-identical to the
+    /// original — the sanctioned exception. Returns the .fxc path. Windows
+    /// only (throws PlatformNotSupportedException elsewhere).
+    /// </summary>
+    public static string Recompile(string hlslPath)
+    {
+        var bytes = File.ReadAllBytes(hlslPath);
+        var outPath = hlslPath.EndsWith(".hlsl", StringComparison.OrdinalIgnoreCase)
+            ? hlslPath.Substring(0, hlslPath.Length - ".hlsl".Length)   // <name>.fxc
+            : hlslPath + ".fxc";
+
+        var (entry, target, flags) = ParseDirectiveOrDerive(bytes, outPath);
+        var dxbc = HlslCompiler.Compile(bytes, Path.GetFileName(outPath), entry, target, flags);
+        File.WriteAllBytes(outPath, dxbc);
+        return outPath;
+    }
+
+    // ─── recompile parameter helpers ────────────────────────────────────
+
+    private static readonly Regex DirectiveRe =
+        new("^//FXC\\s+target=(\\S+)\\s+entry=(\\S+)\\s+flags=0x([0-9A-Fa-f]+)", RegexOptions.Compiled);
+
+    private static (string entry, string target, uint flags) ParseDirectiveOrDerive(byte[] hlsl, string fxcName)
+    {
+        // First line may be the //FXC directive emitted at extraction.
+        int nl = Array.IndexOf(hlsl, (byte)'\n');
+        if (nl > 0)
+        {
+            var first = Encoding.ASCII.GetString(hlsl, 0, nl);
+            var m = DirectiveRe.Match(first);
+            if (m.Success)
+                return (m.Groups[2].Value, m.Groups[1].Value,
+                        Convert.ToUInt32(m.Groups[3].Value, 16));
+        }
+        var (entry, target) = StageInfo(fxcName);
+        return (entry, target, 0u);
+    }
+
+    private static (string entry, string target) StageInfo(string fxcPath)
+    {
+        var stem = Path.GetFileNameWithoutExtension(fxcPath); // strips .fxc
+        bool ps = stem.EndsWith("_ps", StringComparison.OrdinalIgnoreCase);
+        var s = ps ? "ps" : "vs";
+        return ($"{s}_main", $"{s}_5_0");
+    }
+
 
     /// <summary>
     /// Reconstruct the original per-file source (.shdr/.h) from the #line

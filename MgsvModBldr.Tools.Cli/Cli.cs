@@ -143,6 +143,7 @@ public static class Cli
         Console.WriteLine("  .mtar/.spch/.tcvp/.rdf/.fv2 -> writes <name>.<ext>.xml (+folder for mtar) ; *.<ext>.xml repacks");
         Console.WriteLine("  .fxc                        -> writes <name>.fxc.hlsl   (extract embedded HLSL source; Shift-JIS comments preserved)");
         Console.WriteLine("  .fxc -files                 -> writes <name>_src/       (reconstruct the original .shdr/.h source files)");
+        Console.WriteLine("  *.fxc.hlsl                  -> writes <name>.fxc        (recompile HLSL -> DXBC via D3DCompile; Windows; functional not byte-exact)");
         Console.WriteLine("  .mtar                       -> writes <name>.mtar.xml + <stem>_mtar/  (decompile motion archive)");
         Console.WriteLine("  *.mtar.xml                  -> writes <name>.mtar        (recompile from xml + folder)");
     }
@@ -196,6 +197,12 @@ public static class Cli
             var p = hlslFiles ? HlslConverter.UnpackFiles(input) : HlslConverter.Unpack(input);
             if (p is null) { Console.Error.WriteLine($"No embedded HLSL source in {input} (no SDBG chunk)."); return 2; }
             Console.WriteLine($"Extracted {input} -> {p}");
+            return 0;
+        }
+        if (ext == ".hlsl")
+        {
+            var p = HlslConverter.Recompile(input);
+            Console.WriteLine($"Compiled  {input} -> {p}");
             return 0;
         }
 

@@ -41,6 +41,7 @@ public sealed class HlslTests : IToolTests
             if (fxcs.Count == 0) return (true, "no .fxc in fsop");
 
             int valid = 0, noSrc = 0, bad = 0;
+            var withSrc = new List<(string path, byte[] src)>();
             foreach (var fxc in fxcs)
             {
                 var src = HlslConverter.ExtractSourceBytes(File.ReadAllBytes(fxc));
@@ -50,7 +51,7 @@ public sealed class HlslTests : IToolTests
                 var ascii = System.Text.Encoding.Latin1.GetString(src);
                 if (src.Length > 50 && ascii.Contains("#line") &&
                     (ascii.Contains("return") || ascii.Contains("void ") || ascii.Contains("float") || ascii.Contains("struct")))
-                    valid++;
+                { valid++; withSrc.Add((fxc, src)); }
                 else bad++;
             }
 
@@ -58,7 +59,34 @@ public sealed class HlslTests : IToolTests
             // legitimately exist (compiled without embedded debug source).
             if (bad > 0)
                 return (false, $"{valid}/{fxcs.Count} valid, {bad} MALFORMED ({noSrc} no-source)");
-            return (true, $"{valid}/{fxcs.Count} -> valid HLSL" + (noSrc > 0 ? $" ({noSrc} no-source)" : ""));
+
+            // Recompile validation (Windows): a sample of the extracted sources
+            // must compile back to valid SM5 DXBC via D3DCompile. This proves
+            // the decompile->recompile round-trip works (functional, not
+            // byte-exact — the sanctioned exception).
+            string recNote = "";
+            if (HlslCompiler.IsAvailable && withSrc.Count > 0)
+            {
+                int recOk = 0, recFail = 0; string firstErr = null;
+                foreach (var (path, src) in withSrc.Take(12))
+                {
+                    bool ps = Path.GetFileNameWithoutExtension(path).EndsWith("_ps", StringComparison.OrdinalIgnoreCase);
+                    var entry = ps ? "ps_main" : "vs_main";
+                    var target = ps ? "ps_5_0" : "vs_5_0";
+                    try
+                    {
+                        var dxbc = HlslCompiler.Compile(src, Path.GetFileName(path), entry, target, 0);
+                        if (dxbc.Length >= 4 && dxbc[0] == (byte)'D' && dxbc[1] == (byte)'X') recOk++;
+                        else { recFail++; firstErr ??= Path.GetFileName(path) + ": not DXBC"; }
+                    }
+                    catch (Exception ex) { recFail++; firstErr ??= Path.GetFileName(path) + ": " + ex.Message; }
+                }
+                if (recFail > 0)
+                    return (false, $"{valid}/{fxcs.Count} extracted; recompile {recOk} ok, {recFail} FAIL ({firstErr})");
+                recNote = $"; recompiled {recOk}/{Math.Min(12, withSrc.Count)} ok";
+            }
+
+            return (true, $"{valid}/{fxcs.Count} -> valid HLSL" + (noSrc > 0 ? $" ({noSrc} no-source)" : "") + recNote);
         }
         catch (Exception ex)
         {
