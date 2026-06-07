@@ -36,9 +36,13 @@ public static class Cli
 {
     public static int Run(string[] args)
     {
-        // No args: just the fox. (Launch splash.)
+        // No args: open the interactive fox shell (one living process whose
+        // fox recolours in place per command, instead of a fresh logo each
+        // time). When piped/redirected there's no TTY — just print the
+        // splash and exit so scripts stay clean.
         if (args.Length == 0)
         {
+            if (FoxLogo.CanGoInteractive) return Interactive();
             FoxLogo.Show(FoxLogo.DefaultColor);
             return 0;
         }
@@ -91,9 +95,21 @@ public static class Cli
             return TestRunner.Run(harvest, filter);
         }
 
-        bool roundtrip = false;
-        bool hlslFiles = false;
-        bool stpGz = false;
+        // A file/folder (incl. drag-and-drop onto the exe): one-shot convert,
+        // drawing the fox out once in the tool's colour.
+        return ExecuteFileOp(args, LogoMode.Animate);
+    }
+
+    private enum LogoMode { None, Animate, Repaint }
+
+    /// <summary>
+    /// Parse the conversion flags + positional input and dispatch. The fox is
+    /// drawn out (one-shot) or recoloured in place (interactive) per
+    /// <paramref name="logo"/>. Errors surface as FOXDIE.
+    /// </summary>
+    private static int ExecuteFileOp(string[] args, LogoMode logo)
+    {
+        bool roundtrip = false, hlslFiles = false, stpGz = false;
         var positional = new List<string>();
         foreach (var a in args)
         {
@@ -116,9 +132,12 @@ public static class Cli
             return 2;
         }
 
-        // Draw the fox out in this tool's colour as run feedback (interactive
-        // only; skipped when piped so scripts/tests stay clean).
-        FoxLogo.DrawOut(FoxLogo.ColorFor(ToolNameFor(input)));
+        var color = FoxLogo.ColorFor(ToolNameFor(input));
+        switch (logo)
+        {
+            case LogoMode.Animate: FoxLogo.DrawOut(color); break; // one-shot flourish
+            case LogoMode.Repaint: FoxLogo.Repaint(color); break; // interactive in-place recolour
+        }
 
         try
         {
@@ -129,6 +148,71 @@ public static class Cli
             Console.Error.WriteLine($"FOXDIE: {ex.Message}");
             return 1;
         }
+    }
+
+    /// <summary>
+    /// The interactive fox shell. Draws the fox once, then loops reading a
+    /// path (or a quoted path dropped into the window) per line; each command
+    /// recolours the SAME fox in place and prints its result below. Type
+    /// help / clear / exit. Plain commands only — no flags juggling.
+    /// </summary>
+    private static int Interactive()
+    {
+        try { Console.Clear(); } catch { /* some hosts disallow */ }
+        FoxLogo.DrawOut(FoxLogo.DefaultColor); // animated first draw
+        Console.WriteLine("  Drop a file here or type a path to convert.   ( help · clear · exit )");
+
+        while (true)
+        {
+            var prev = Console.ForegroundColor;
+            Console.ForegroundColor = FoxLogo.DefaultColor;
+            Console.Write("  fox> ");
+            Console.ForegroundColor = prev;
+
+            string line;
+            try { line = Console.ReadLine(); }
+            catch { break; }
+            if (line is null) break;            // EOF (Ctrl+Z)
+            line = line.Trim();
+            if (line.Length == 0) continue;
+            if (line is "exit" or "quit" or ":q" or "q") break;
+            if (line is "help" or "--help" or "-h" or "?")
+            {
+                FoxLogo.Repaint(FoxLogo.DefaultColor);
+                PrintSupportedTypes();
+                continue;
+            }
+            if (line is "clear" or "cls")
+            {
+                FoxLogo.Repaint(FoxLogo.DefaultColor);
+                continue;
+            }
+
+            ExecuteFileOp(Tokenize(line), LogoMode.Repaint);
+        }
+
+        Console.ResetColor();
+        try { Console.Clear(); } catch { /* ignore */ }
+        return 0;
+    }
+
+    /// <summary>Split a shell line into tokens, honouring "double quotes" (paths with spaces / drag-drop).</summary>
+    private static string[] Tokenize(string line)
+    {
+        var tokens = new List<string>();
+        var sb = new System.Text.StringBuilder();
+        bool inQuote = false;
+        foreach (var c in line)
+        {
+            if (c == '"') { inQuote = !inQuote; continue; }
+            if (!inQuote && char.IsWhiteSpace(c))
+            {
+                if (sb.Length > 0) { tokens.Add(sb.ToString()); sb.Clear(); }
+            }
+            else sb.Append(c);
+        }
+        if (sb.Length > 0) tokens.Add(sb.ToString());
+        return tokens.ToArray();
     }
 
     /// <summary>

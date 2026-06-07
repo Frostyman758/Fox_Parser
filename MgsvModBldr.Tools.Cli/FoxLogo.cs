@@ -3,11 +3,12 @@ using System.Text;
 namespace MgsvModBldr.Tools.Cli;
 
 /// <summary>
-/// The FOX splash. Loads the ASCII fox (shipped loose as fox_logo.txt next
-/// to the exe) and renders it: instantly on launch (no args), or "drawn
-/// out" line-by-line in a per-tool colour as run feedback. Geometry never
-/// changes — only the colour shifts per tool. Skipped entirely when stdout
-/// is redirected (pipes / the test harness) so scripted output stays clean.
+/// The FOX splash. Loads the ASCII fox from the loose fox_logo.txt next to
+/// the exe; if that file is missing the exe still runs (a tiny built-in
+/// fallback is used). Rendered instantly on launch, "drawn out" line-by-line
+/// in a per-tool colour as one-shot feedback, or recoloured in place in the
+/// interactive shell. Geometry never changes — only the colour shifts per
+/// tool. Skipped when stdout is redirected so scripted output stays clean.
 /// </summary>
 internal static class FoxLogo
 {
@@ -158,4 +159,25 @@ internal static class FoxLogo
         finally { Console.ForegroundColor = prev; }
         Console.WriteLine();
     }
+
+    /// <summary>
+    /// Interactive recolour: clear the screen and redraw the SAME fox in a
+    /// new colour at the top, so the existing logo appears to just change
+    /// colour rather than a new one being spawned. Leaves the cursor on a
+    /// blank line below the fox, ready for command output.
+    /// </summary>
+    public static void Repaint(ConsoleColor color)
+    {
+        if (Console.IsOutputRedirected) return;
+        EnsureUtf8();
+        try { Console.Clear(); } catch { /* some hosts disallow */ }
+        var prev = Console.ForegroundColor;
+        try { Console.ForegroundColor = color; foreach (var l in Lines) Console.WriteLine(l); }
+        finally { Console.ForegroundColor = prev; }
+        Console.WriteLine();
+    }
+
+    /// <summary>True when the console can host the interactive fox shell.</summary>
+    public static bool CanGoInteractive =>
+        !Console.IsInputRedirected && !Console.IsOutputRedirected;
 }
