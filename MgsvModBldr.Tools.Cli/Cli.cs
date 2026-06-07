@@ -122,7 +122,7 @@ public static class Cli
         Console.WriteLine("  tools.exe <file>           Auto-detect by extension and convert.");
         Console.WriteLine("  tools.exe --roundtrip <f>  <op>-><inverse> and SHA-check (PASS only for deterministic refs).");
         Console.WriteLine("  tools.exe test             Run automated regression on cached fixtures.");
-        Console.WriteLine("  tools.exe test <tool>      Same, but only for one tool (fsop|fox|ftex|qar|fpk|pftxs|subp|ffnt|lng|twpf|mtar|spch|tcvp|rdf|fv2|hlsl).");
+        Console.WriteLine("  tools.exe test <tool>      Same, but only for one tool (fsop|fox|ftex|qar|fpk|pftxs|subp|ffnt|lng|twpf|mtar|spch|tcvp|rdf|fv2|hlsl|sbp).");
         Console.WriteLine("  tools.exe test --harvest   Refresh fixtures from Z:\\ first (needs datfpk in builder.xml).");
         Console.WriteLine("  tools.exe test <tool> --harvest   Refresh just that tool's fixtures.");
         Console.WriteLine();
@@ -141,6 +141,8 @@ public static class Cli
         Console.WriteLine("  .lng/.lng2                  -> writes <name>.lng.xml     (decompile language)");
         Console.WriteLine("  *.lng.xml                   -> writes <name>.lng         (recompile)");
         Console.WriteLine("  .mtar/.spch/.tcvp/.rdf/.fv2 -> writes <name>.<ext>.xml (+folder for mtar) ; *.<ext>.xml repacks");
+        Console.WriteLine("  .sbp                        -> writes <name>.sbp.json + <name>_sbp/  (unpack sound bank package)");
+        Console.WriteLine("  *.sbp.json                  -> writes <name>.sbp        (repack)");
         Console.WriteLine("  .fxc                        -> writes <name>.fxc.hlsl   (extract embedded HLSL source; Shift-JIS comments preserved)");
         Console.WriteLine("  .fxc -files                 -> writes <name>_src/       (reconstruct the original .shdr/.h source files)");
         Console.WriteLine("  *.fxc.hlsl                  -> writes <name>.fxc        (recompile HLSL -> DXBC via D3DCompile; Windows; functional not byte-exact)");
@@ -237,6 +239,10 @@ public static class Cli
         if (ext == ".fpk" || ext == ".fpkd") { var p = MgsvModBldr.Tools.Fpk.FpkPacker.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }
         if (ext == ".json" && (input.EndsWith(".fpk.json", StringComparison.OrdinalIgnoreCase) || input.EndsWith(".fpkd.json", StringComparison.OrdinalIgnoreCase)))
         { var p = MgsvModBldr.Tools.Fpk.FpkPacker.Pack(input); Console.WriteLine($"Packed    {input} -> {p}"); return 0; }
+
+        if (ext == ".sbp") { var p = MgsvModBldr.Tools.Sbp.SbpPacker.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }
+        if (ext == ".json" && input.EndsWith(".sbp.json", StringComparison.OrdinalIgnoreCase))
+        { var p = MgsvModBldr.Tools.Sbp.SbpPacker.Pack(input); Console.WriteLine($"Packed    {input} -> {p}"); return 0; }
 
         if (ext == ".dat" || ext == ".qar") { var p = QarPacker.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }
         if (ext == ".json" && (input.EndsWith(".dat.json", StringComparison.OrdinalIgnoreCase) || input.EndsWith(".qar.json", StringComparison.OrdinalIgnoreCase)))

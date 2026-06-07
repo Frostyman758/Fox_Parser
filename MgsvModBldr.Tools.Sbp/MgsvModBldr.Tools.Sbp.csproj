@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>MgsvModBldr.Tools.Sbp</RootNamespace>
+    <AssemblyName>MgsvModBldr.Tools.Sbp</AssemblyName>
+  </PropertyGroup>
+  <!-- .sbp (Sound Bank Package): a flat container holding a handful of
+       sound sub-files (.bnk / .stp / .sab). Layout: an 8-byte "SBPL"
+       header, a 12-byte entry table (4-byte magic + uint offset + int
+       size), then each sub-file's data on a 16-byte boundary (0x00 pad).
+       Fully lossless -> gate is byte-exact round-trip vs the game file.
+       Self-contained (no Core/dictionary deps); cross-platform. -->
+</Project>
