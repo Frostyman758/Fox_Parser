@@ -15,6 +15,9 @@
        so it can be updated independently). All tools resolve it via
        AppContext.BaseDirectory. -->
   <ItemGroup>
+    <None Include="..\fox_logo.txt" Link="fox_logo.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="..\qar_dictionary.txt" Link="qar_dictionary.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

@@ -36,10 +36,18 @@ public static class Cli
 {
     public static int Run(string[] args)
     {
+        // No args: just the fox. (Launch splash.)
         if (args.Length == 0)
         {
-            PrintUsage();
-            return 2;
+            FoxLogo.Show(FoxLogo.DefaultColor);
+            return 0;
+        }
+
+        // --help: just the list of supported file types.
+        if (args[0] is "--help" or "-h" or "-?" or "/?" or "help")
+        {
+            PrintSupportedTypes();
+            return 0;
         }
 
         // Debug: print game PathCode for a path (compare against archive hashes).
@@ -97,16 +105,20 @@ public static class Cli
 
         if (positional.Count == 0)
         {
-            PrintUsage();
+            PrintSupportedTypes();
             return 2;
         }
 
         var input = positional[0];
         if (!File.Exists(input) && !Directory.Exists(input))
         {
-            Console.Error.WriteLine($"Input does not exist: {input}");
+            Console.Error.WriteLine($"FOXDIE: input does not exist: {input}");
             return 2;
         }
+
+        // Draw the fox out in this tool's colour as run feedback (interactive
+        // only; skipped when piped so scripts/tests stay clean).
+        FoxLogo.DrawOut(FoxLogo.ColorFor(ToolNameFor(input)));
 
         try
         {
@@ -114,43 +126,87 @@ public static class Cli
         }
         catch (Exception ex)
         {
-            Console.Error.WriteLine($"ERROR: {ex.GetType().Name}: {ex.Message}");
+            Console.Error.WriteLine($"FOXDIE: {ex.Message}");
             return 1;
         }
     }
 
-    private static void PrintUsage()
+    /// <summary>
+    /// Map an input path to its tool key (for the splash colour). Mirrors
+    /// the dispatch routing; falls back to the default colour when unknown.
+    /// </summary>
+    private static string ToolNameFor(string input)
     {
-        Console.WriteLine("Usage:");
-        Console.WriteLine("  tools.exe <file>           Auto-detect by extension and convert.");
-        Console.WriteLine("  tools.exe --roundtrip <f>  <op>-><inverse> and SHA-check (PASS only for deterministic refs).");
-        Console.WriteLine("  tools.exe test             Run automated regression on cached fixtures.");
-        Console.WriteLine("  tools.exe test <tool>      Same, but only for one tool (fsop|fox|ftex|qar|fpk|pftxs|subp|ffnt|lng|twpf|mtar|spch|tcvp|rdf|fv2|hlsl|sbp).");
-        Console.WriteLine("  tools.exe test --harvest   Refresh fixtures from Z:\\ first (needs datfpk in builder.xml).");
-        Console.WriteLine("  tools.exe test <tool> --harvest   Refresh just that tool's fixtures.");
-        Console.WriteLine();
-        Console.WriteLine("Supported inputs:");
+        if (Directory.Exists(input))
+        {
+            var t = input.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            if (t.EndsWith("_stp", StringComparison.OrdinalIgnoreCase) ||
+                t.EndsWith("_sab", StringComparison.OrdinalIgnoreCase)) return "stp";
+            return "fsop";
+        }
+
+        var name = Path.GetFileName(input);
+        bool Has(string suffix) => name.EndsWith(suffix, StringComparison.OrdinalIgnoreCase);
+        var ext = Path.GetExtension(input).ToLowerInvariant();
+
+        if (ext == ".xml")
+        {
+            if (Has(".subp.xml")) return "subp";
+            if (Has(".twpf.xml")) return "twpf";
+            if (Has(".ffnt.xml")) return "ffnt";
+            if (Has(".lng.xml") || Has(".lng2.xml")) return "lng";
+            if (Has(".mtar.xml")) return "mtar";
+            if (Has(".spch.xml")) return "spch";
+            if (Has(".tcvp.xml")) return "tcvp";
+            if (Has(".rdf.xml")) return "rdf";
+            if (Has(".fv2.xml")) return "fv2";
+            return "fox";
+        }
+        if (ext == ".json")
+        {
+            if (Has(".pftxs.json")) return "pftxs";
+            if (Has(".fpk.json") || Has(".fpkd.json")) return "fpk";
+            if (Has(".dat.json") || Has(".qar.json")) return "qar";
+            if (Has(".sbp.json")) return "sbp";
+            return "fox";
+        }
+        return ext switch
+        {
+            ".subp" => "subp", ".twpf" => "twpf", ".ffnt" => "ffnt",
+            ".lng" or ".lng2" => "lng", ".mtar" => "mtar", ".spch" => "spch",
+            ".tcvp" => "tcvp", ".rdf" => "rdf", ".fv2" => "fv2",
+            ".fxc" or ".hlsl" => "hlsl", ".fsop" => "fsop",
+            ".ftex" or ".dds" or ".ftexs" => "ftex",
+            ".pftxs" => "pftxs", ".fpk" or ".fpkd" => "fpk",
+            ".dat" or ".qar" => "qar", ".sbp" => "sbp",
+            ".stp" or ".sab" => "stp",
+            _ when FoxPacker.DecompilableExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase) => "fox",
+            _ => null,
+        };
+    }
+
+    private static void PrintSupportedTypes()
+    {
+        Console.WriteLine("Supported file types:");
         Console.WriteLine("  .fox2 .bnd .clo .des .evf .fsd .lad .parts .ph .phsd .sdf .sim .tgt .vdp .veh .vfxlf");
-        Console.WriteLine("      -> writes <file>.xml      (decompile)");
-        Console.WriteLine("  *.xml                       -> writes the stripped-extension binary back");
-        Console.WriteLine("  .fsop                       -> writes <basename>_unpacked/  with metadata.json + .fxc files");
-        Console.WriteLine("  any folder with metadata.json   -> writes <basename>.fsop  next to the folder");
-        Console.WriteLine("  .subp                       -> writes <name>.subp.xml   (decompile subtitle pack)");
-        Console.WriteLine("  *.subp.xml                  -> writes <name>.subp        (recompile)");
-        Console.WriteLine("  .twpf                       -> writes <name>.twpf.xml   (decompile weather params)");
-        Console.WriteLine("  *.twpf.xml                  -> writes <name>.twpf        (recompile)");
-        Console.WriteLine("  .ffnt                       -> writes <name>.ffnt.xml + <stem>_N.png  (decompile font)");
-        Console.WriteLine("  *.ffnt.xml                  -> writes <name>.ffnt        (recompile from xml + pngs)");
-        Console.WriteLine("  .lng/.lng2                  -> writes <name>.lng.xml     (decompile language)");
-        Console.WriteLine("  *.lng.xml                   -> writes <name>.lng         (recompile)");
-        Console.WriteLine("  .mtar/.spch/.tcvp/.rdf/.fv2 -> writes <name>.<ext>.xml (+folder for mtar) ; *.<ext>.xml repacks");
-        Console.WriteLine("  .sbp                        -> writes <name>.sbp.json + <name>_sbp/  (unpack sound bank package)");
-        Console.WriteLine("  *.sbp.json                  -> writes <name>.sbp        (repack)");
-        Console.WriteLine("  .fxc                        -> writes <name>.fxc.hlsl   (extract embedded HLSL source; Shift-JIS comments preserved)");
-        Console.WriteLine("  .fxc -files                 -> writes <name>_src/       (reconstruct the original .shdr/.h source files)");
-        Console.WriteLine("  *.fxc.hlsl                  -> writes <name>.fxc        (recompile HLSL -> DXBC via D3DCompile; Windows; functional not byte-exact)");
-        Console.WriteLine("  .mtar                       -> writes <name>.mtar.xml + <stem>_mtar/  (decompile motion archive)");
-        Console.WriteLine("  *.mtar.xml                  -> writes <name>.mtar        (recompile from xml + folder)");
+        Console.WriteLine("                Fox data            <-> .xml");
+        Console.WriteLine("  .fsop         shader package       <-> folder");
+        Console.WriteLine("  .ftex / .dds  texture              .ftex <-> .dds");
+        Console.WriteLine("  .fpk / .fpkd  file package         <-> .fpk.json + folder");
+        Console.WriteLine("  .dat / .qar   archive              <-> .json + folder");
+        Console.WriteLine("  .pftxs        packed textures      <-> .pftxs.json + folder");
+        Console.WriteLine("  .subp         subtitles            <-> .subp.xml");
+        Console.WriteLine("  .ffnt         font                 <-> .ffnt.xml + .png");
+        Console.WriteLine("  .lng / .lng2  language             <-> .lng.xml");
+        Console.WriteLine("  .twpf         weather params       <-> .twpf.xml");
+        Console.WriteLine("  .mtar         motion archive       <-> .mtar.xml + folder");
+        Console.WriteLine("  .spch         speech               <-> .spch.xml");
+        Console.WriteLine("  .tcvp         cover-point locators <-> .tcvp.xml");
+        Console.WriteLine("  .rdf          radio dialogue       <-> .rdf.xml");
+        Console.WriteLine("  .fv2          vfx                  <-> .fv2.xml");
+        Console.WriteLine("  .fxc          DXBC shader          -> .hlsl source (.hlsl -> .fxc)");
+        Console.WriteLine("  .sbp          sound bank package   <-> .sbp.json + folder");
+        Console.WriteLine("  .stp / .sab   streamed audio/anim  <-> folder");
     }
 
     private static int Dispatch(string input, bool roundtrip, bool hlslFiles = false, bool stpGz = false)
@@ -209,7 +265,7 @@ public static class Cli
             // Default: extract the preprocessed .hlsl. -files: reconstruct the
             // original .shdr/.h source files into <name>_src/.
             var p = hlslFiles ? HlslConverter.UnpackFiles(input) : HlslConverter.Unpack(input);
-            if (p is null) { Console.Error.WriteLine($"No embedded HLSL source in {input} (no SDBG chunk)."); return 2; }
+            if (p is null) { Console.Error.WriteLine($"FOXDIE: no embedded HLSL source in {input} (no SDBG chunk)."); return 2; }
             Console.WriteLine($"Extracted {input} -> {p}");
             return 0;
         }
@@ -239,7 +295,7 @@ public static class Cli
             var dotIdx = stem.IndexOf('.');
             if (dotIdx > 0) stem = stem[..dotIdx];
             var ftex = Path.Combine(Path.GetDirectoryName(input) ?? ".", stem + ".ftex");
-            Console.Error.WriteLine($".ftexs is a mipmap sidecar, not a standalone file.");
+            Console.Error.WriteLine($"FOXDIE: .ftexs is a mipmap sidecar, not a standalone file.");
             Console.Error.WriteLine($"Unpack its .ftex instead:  modbldr-tools \"{ftex}\"");
             return 2;
         }
@@ -262,7 +318,7 @@ public static class Cli
         if (ext == ".json" && (input.EndsWith(".dat.json", StringComparison.OrdinalIgnoreCase) || input.EndsWith(".qar.json", StringComparison.OrdinalIgnoreCase)))
         { var p = QarPacker.Pack(input); Console.WriteLine($"Packed    {input} -> {p}"); return 0; }
 
-        Console.Error.WriteLine($"Unknown extension '{ext}'. See --help.");
+        Console.Error.WriteLine($"FOXDIE: unknown extension '{ext}'. See --help.");
         return 2;
     }
 
