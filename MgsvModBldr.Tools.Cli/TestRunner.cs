@@ -11,6 +11,7 @@ using MgsvModBldr.Tools.Twpf.Tests;
 using MgsvModBldr.Tools.Mtar.Tests;
 using MgsvModBldr.Tools.Spch.Tests;
 using MgsvModBldr.Tools.Tcvp.Tests;
+using MgsvModBldr.Tools.Rdf.Tests;
 
 namespace MgsvModBldr.Tools.Tests;
 
@@ -39,6 +40,7 @@ public static class TestRunner
         new MtarTests(),
         new SpchTests(),
         new TcvpTests(),
+        new RdfTests(),
     };
 
     /// <summary>
