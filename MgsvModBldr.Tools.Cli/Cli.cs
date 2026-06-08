@@ -82,6 +82,16 @@ public static class Cli
             return 0;
         }
 
+        // update-dicts [-repo <owner/repo[@branch] | github-url>]
+        //   Refresh dict/ from caplag's mgsv-lookup-strings (default) or a fork.
+        if (args[0] is "update-dicts" or "updatedicts" or "update-dictionaries")
+        {
+            string repo = null;
+            for (int i = 1; i < args.Length - 1; i++)
+                if (args[i] is "-repo" or "--repo") { repo = args[i + 1]; break; }
+            return DictUpdater.Run(repo);
+        }
+
         // `test` is a subcommand, not a file path — handle before file checks.
         //   test                  -> run everything
         //   test <tool>           -> run just that tool (fsop|fox|ftex)
