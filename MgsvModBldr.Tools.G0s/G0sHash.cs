@@ -67,6 +67,21 @@ public static class G0sHash
 
     private static readonly object Lock = new();
     private static Dictionary<ulong, string> _dict;
+    private static string _dictDir;
+
+    /// <summary>
+    /// Explicit directory to look for gzs_dictionary.txt in. Hosts whose
+    /// <see cref="AppContext.BaseDirectory"/> isn't their own folder — e.g. a
+    /// NativeAOT library loaded into another process (explorer.exe) — set this
+    /// so the dictionary is still found. Null (default) uses
+    /// AppContext.BaseDirectory, preserving the original behaviour. Setting it
+    /// drops the cached dictionary so the next lookup reloads.
+    /// </summary>
+    public static string DictionaryDirectory
+    {
+        get => _dictDir;
+        set { lock (Lock) { _dictDir = value; _dict = null; } }
+    }
 
     private static Dictionary<ulong, string> Dict()
     {
@@ -89,8 +104,9 @@ public static class G0sHash
 
     private static string ResolveDict(string name)
     {
-        var inDict = Path.Combine(AppContext.BaseDirectory, "dict", name);
-        return File.Exists(inDict) ? inDict : Path.Combine(AppContext.BaseDirectory, name);
+        var baseDir = _dictDir ?? AppContext.BaseDirectory;
+        var inDict = Path.Combine(baseDir, "dict", name);
+        return File.Exists(inDict) ? inDict : Path.Combine(baseDir, name);
     }
 
     /// <summary>
