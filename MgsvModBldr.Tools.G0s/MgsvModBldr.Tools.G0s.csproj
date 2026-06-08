@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>MgsvModBldr.Tools.G0s</RootNamespace>
+    <AssemblyName>MgsvModBldr.Tools.G0s</AssemblyName>
+  </PropertyGroup>
+  <!-- GZ QAR (.g0s) — the Ground Zeroes archive format (GzsTool 0.2 lineage).
+       Footer-based, offset-keyed XOR + an optional inner cipher. Unlike the
+       reference we re-encrypt the inner layer on repack, so .g0s round-trips
+       byte-exact (GzsTool 0.2 stubbed that out). Uses Core.CityHash64 (legacy
+       CityHash, == the game) for path hashing; ships gzs_dictionary.txt. -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\mgsv_modbldr\csgui\MgsvModBldr.Core\MgsvModBldr.Core.csproj" />
+  </ItemGroup>
+</Project>

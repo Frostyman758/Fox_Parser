@@ -24,6 +24,9 @@
     <None Include="..\qar_dictionary.txt" Link="dict\qar_dictionary.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="..\gzs_dictionary.txt" Link="dict\gzs_dictionary.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="..\twpf_stringId_dictionary.txt" Link="dict\twpf_stringId_dictionary.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

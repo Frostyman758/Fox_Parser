@@ -27,6 +27,7 @@ internal static class FoxLogo
         ["tcvp"] = ConsoleColor.DarkRed,     ["rdf"]  = ConsoleColor.White,
         ["fv2"]  = ConsoleColor.DarkGray,    ["hlsl"] = ConsoleColor.Magenta,
         ["sbp"]  = ConsoleColor.Green,       ["stp"]  = ConsoleColor.Cyan,
+        ["g0s"]  = ConsoleColor.Yellow,
     };
 
     public static ConsoleColor ColorFor(string tool) =>

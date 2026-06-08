@@ -252,6 +252,7 @@ public static class Cli
             if (Has(".fpk.json") || Has(".fpkd.json")) return "fpk";
             if (Has(".dat.json") || Has(".qar.json")) return "qar";
             if (Has(".sbp.json")) return "sbp";
+            if (Has(".g0s.json")) return "g0s";
             return "fox";
         }
         return ext switch
@@ -263,6 +264,7 @@ public static class Cli
             ".ftex" or ".dds" or ".ftexs" => "ftex",
             ".pftxs" => "pftxs", ".fpk" or ".fpkd" => "fpk",
             ".dat" or ".qar" => "qar", ".sbp" => "sbp",
+            ".g0s" => "g0s",
             ".stp" or ".sab" => "stp",
             _ when FoxPacker.DecompilableExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase) => "fox",
             _ => null,
@@ -291,6 +293,7 @@ public static class Cli
         Console.WriteLine("  .fxc          DXBC shader          -> .hlsl source (.hlsl -> .fxc)");
         Console.WriteLine("  .sbp          sound bank package   <-> .sbp.json + folder");
         Console.WriteLine("  .stp / .sab   streamed audio/anim  <-> folder");
+        Console.WriteLine("  .g0s          GZ QAR archive        <-> .g0s.json + folder");
     }
 
     private static int Dispatch(string input, bool roundtrip, bool hlslFiles = false, bool stpGz = false)
@@ -391,6 +394,10 @@ public static class Cli
         if (ext == ".fpk" || ext == ".fpkd") { var p = MgsvModBldr.Tools.Fpk.FpkPacker.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }
         if (ext == ".json" && (input.EndsWith(".fpk.json", StringComparison.OrdinalIgnoreCase) || input.EndsWith(".fpkd.json", StringComparison.OrdinalIgnoreCase)))
         { var p = MgsvModBldr.Tools.Fpk.FpkPacker.Pack(input); Console.WriteLine($"Packed    {input} -> {p}"); return 0; }
+
+        if (ext == ".g0s") { var p = MgsvModBldr.Tools.G0s.G0sPacker.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }
+        if (ext == ".json" && input.EndsWith(".g0s.json", StringComparison.OrdinalIgnoreCase))
+        { var p = MgsvModBldr.Tools.G0s.G0sPacker.Pack(input); Console.WriteLine($"Packed    {input} -> {p}"); return 0; }
 
         if (ext == ".stp" || ext == ".sab") { var p = StpPacker.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }
 
