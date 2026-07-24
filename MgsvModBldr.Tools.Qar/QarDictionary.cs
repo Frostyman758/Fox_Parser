@@ -55,6 +55,21 @@ public sealed class QarDictionary
         return $"{pathHash:x}";
     }
 
+    private static Dictionary<uint, string>? _extMap;
+
+    /// <summary>Reverse-map a 13-bit extension code to its ".ext" (null if unknown).</summary>
+    public static string? ExtensionFor(uint extCode)
+    {
+        if (_extMap is null)
+        {
+            var m = new Dictionary<uint, string>(KnownExtensions.Length);
+            foreach (var ext in KnownExtensions)
+                m.TryAdd(GameHash.ExtensionCode(ext), ext);
+            _extMap = m;
+        }
+        return _extMap.TryGetValue(extCode, out var e) ? e : null;
+    }
+
     public static QarDictionary Load(string? path = null)
     {
         path ??= DefaultDictionaryPath();

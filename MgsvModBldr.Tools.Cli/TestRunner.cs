@@ -17,6 +17,7 @@ using MgsvModBldr.Tools.Hlsl.Tests;
 using MgsvModBldr.Tools.Sbp.Tests;
 using MgsvModBldr.Tools.Stp.Tests;
 using MgsvModBldr.Tools.G0s.Tests;
+using MgsvModBldr.Tools.Ui.Tests;
 
 namespace MgsvModBldr.Tools.Tests;
 
@@ -51,6 +52,7 @@ public static class TestRunner
         new SbpTests(),
         new StpTests(),
         new G0sTests(),
+        new UiTests(),
     };
 
     /// <summary>

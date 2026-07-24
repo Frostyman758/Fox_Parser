@@ -7,11 +7,8 @@
     <AssemblyName>MgsvModBldr.Tools.Translation</AssemblyName>
   </PropertyGroup>
   <!-- FoxEngine.TranslationTool port: .subp (subtitles), .ffnt (fonts),
-       .lng (language). Subp uses ISO-8859-5 (rus) which needs the
-       CodePages provider; Latin1/UTF-8 are intrinsic. -->
-  <ItemGroup>
-    <PackageReference Include="System.Text.Encoding.CodePages" Version="9.0.0" />
-  </ItemGroup>
+       .lng (language). Subp uses ISO-8859-5 (rus) via the CodePages provider,
+       which is part of the .NET 10 shared framework — no package needed. -->
   <!-- Lang (.lng) StrCode32 reuses Core.CityHash64 (== game hashing). -->
   <ItemGroup>
     <ProjectReference Include="..\..\mgsv_modbldr\csgui\MgsvModBldr.Core\MgsvModBldr.Core.csproj" />

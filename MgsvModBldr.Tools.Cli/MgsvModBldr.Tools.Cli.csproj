@@ -52,5 +52,6 @@
     <ProjectReference Include="..\MgsvModBldr.Tools.Sbp.Tests\MgsvModBldr.Tools.Sbp.Tests.csproj" />
     <ProjectReference Include="..\MgsvModBldr.Tools.Stp.Tests\MgsvModBldr.Tools.Stp.Tests.csproj" />
     <ProjectReference Include="..\MgsvModBldr.Tools.G0s.Tests\MgsvModBldr.Tools.G0s.Tests.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.Ui.Tests\MgsvModBldr.Tools.Ui.Tests.csproj" />
   </ItemGroup>
 </Project>

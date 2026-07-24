@@ -54,6 +54,12 @@ public static class Cli
             return 0;
         }
 
+        // foxhash: forward hash (all variants) + reverse dictionary lookup.
+        if (args[0] is "hash" or "foxhash")
+            return FoxHashCmd.Hash(args.Skip(1).ToArray());
+        if (args[0] is "unhash" or "lookup")
+            return FoxHashCmd.Unhash(args.Skip(1).ToArray());
+
         // Debug: print game PathCode for a path (compare against archive hashes).
         if (args[0] == "pathcode")
         {
@@ -91,6 +97,9 @@ public static class Cli
                 if (args[i] is "-repo" or "--repo") { repo = args[i + 1]; break; }
             return DictUpdater.Run(repo);
         }
+
+        if (args[0] == "gzui")
+            return GzUiCmd.Run(args);
 
         // `test` is a subcommand, not a file path — handle before file checks.
         //   test                  -> run everything
@@ -304,6 +313,14 @@ public static class Cli
         Console.WriteLine("  .sbp          sound bank package   <-> .sbp.json + folder");
         Console.WriteLine("  .stp / .sab   streamed audio/anim  <-> folder");
         Console.WriteLine("  .g0s          GZ QAR archive        <-> .g0s.json + folder");
+        Console.WriteLine();
+        Console.WriteLine("Commands:");
+        Console.WriteLine("  hash <string...>               all hash variants: PathCode64 / StrCode64 / StrCode32 / FNV1_32");
+        Console.WriteLine("  unhash <hex...> [-d file]      reverse-lookup hashes against dict/*.txt (+extra wordlists)");
+        Console.WriteLine("  pathcode | stringid <str...>   single-variant forward hash");
+        Console.WriteLine("  update-dicts [-repo r]         refresh dict/ from mgsv-lookup-strings");
+        Console.WriteLine("  test [<tool>] [--harvest]      regression suite");
+        Console.WriteLine("  buildmgsv <srcDir> <out.mgsv>  full mod build pipeline");
     }
 
     private static int Dispatch(string input, bool roundtrip, bool hlslFiles = false, bool stpGz = false)
