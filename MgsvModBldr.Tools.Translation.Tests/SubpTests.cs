@@ -1,3 +1,4 @@
+// Subp tool regression gate
 using System.Diagnostics;
 using MgsvModBldr.Tools.Translation;
 using MgsvModBldr.Tools.Testing;
@@ -6,20 +7,6 @@ using static MgsvModBldr.Tools.Testing.TestEnv;
 
 namespace MgsvModBldr.Tools.Translation.Tests;
 
-/// <summary>
-/// Subp (.subp subtitle pack) gate — byte-exact parity with Atvaark's
-/// SubpTool (the reference tool), on BOTH directions:
-///   (A) my XML byte-matches SubpTool's XML (cached <c>&lt;name&gt;.subp.ref.xml</c>).
-///   (B) my repack byte-matches SubpTool's repack (cached <c>&lt;name&gt;.subp.ref.repack</c>).
-///
-/// NOTE: the contract is parity with the REFERENCE TOOL, not with the
-/// original game file. SubpTool is lossy vs the game file — it
-/// normalises the file magic (0x0413 → 0x0113) on repack — so a
-/// round-trip against the original would (correctly) differ. Matching
-/// SubpTool's lossy behaviour is the porting contract (same as Fox's
-/// reconstructed literal table). Default codec is ISO-8859-1, which is
-/// binary-safe, so the gate holds for every language.
-/// </summary>
 public sealed class SubpTests : IToolTests
 {
     public string Name => "subp";
@@ -98,13 +85,6 @@ public sealed class SubpTests : IToolTests
                         .ToList();
     }
 
-    /// <summary>
-    /// Subp files live LOOSE on Z:\ under
-    /// <c>Z:\tpp\release\ui\Subtitles\subp\</c>. Picks a spread across
-    /// language folders (different encodings) and sizes, each into a
-    /// hash-keyed bucket (names like common_str.subp collide across
-    /// languages). For each, caches the SubpTool reference XML + repack.
-    /// </summary>
     public void Harvest()
     {
         var dst = Path.Combine(FixturesDir, "subp");
@@ -137,16 +117,6 @@ public sealed class SubpTests : IToolTests
         catch (Exception ex) { Console.WriteLine($"  Subp harvest failed: {ex.Message}"); }
     }
 
-    /// <summary>
-    /// Run SubpToolRef (built from Atvaark's SubpTool source) to cache
-    /// both reference artifacts next to the sample:
-    ///   <c>&lt;name&gt;.subp.ref.xml</c>    (unpack of the original .subp)
-    ///   <c>&lt;name&gt;.subp.ref.repack</c> (repack of that XML — SubpTool's
-    ///                                        own round-trip output)
-    /// Locate the oracle via the SUBPREF env var (path to SubpTool.dll)
-    /// or the default build path. Best-effort: if absent, the gate falls
-    /// back to round-trip XML stability.
-    /// </summary>
     private static void GenerateReference(string stagedSubp)
     {
         var refDll = Environment.GetEnvironmentVariable("SUBPREF");

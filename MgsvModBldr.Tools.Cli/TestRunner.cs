@@ -1,3 +1,4 @@
+// Aggregates per-tool regression suites
 using System.Diagnostics;
 using MgsvModBldr.Tools.Testing;
 using MgsvModBldr.Tools.Fsop.Tests;
@@ -21,13 +22,6 @@ using MgsvModBldr.Tools.Ui.Tests;
 
 namespace MgsvModBldr.Tools.Tests;
 
-/// <summary>
-/// Thin aggregator over the per-tool <see cref="IToolTests"/> suites.
-/// Each tool owns its own gate + harvest in its sibling .Tests project
-/// (so a tool can be lifted out with its verification intact); this just
-/// collects them, applies the optional name filter, runs harvest/gate in
-/// a fixed order, and prints the summary.
-/// </summary>
 public static class TestRunner
 {
     // Registration order == harvest + run order.
@@ -55,11 +49,6 @@ public static class TestRunner
         new UiTests(),
     };
 
-    /// <summary>
-    /// Run regression tests, optionally scoped to one tool by name
-    /// (fsop|fox|ftex|qar|fpk|pftxs|subp). With <paramref name="harvest"/>
-    /// true, refresh fixtures first — also scoped to the filter.
-    /// </summary>
     public static int Run(bool harvest, string toolFilter = null)
     {
         var all = Tools();

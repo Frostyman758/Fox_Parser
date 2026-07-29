@@ -1,3 +1,4 @@
+// DDS DX10 extended header
 using System;
 using System.IO;
 using System.Text;

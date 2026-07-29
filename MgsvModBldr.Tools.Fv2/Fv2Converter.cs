@@ -1,18 +1,14 @@
-// CLI façade for the .fv2 format lib. Serialises the full Fv2 struct to
-// XML (lossless — preserves the unknown indices FvTwool's named export
-// drops), so the round-trip is byte-exact against the game file.
+// .fv2 <-> xml facade
+// Serialises the FULL Fv2 struct (keeps the unknown indices FvTwool's
+// named export drops), so the round-trip is byte-exact vs the game file.
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
 
 namespace MgsvModBldr.Tools.Fv2;
 
-/// <summary>
-/// CLI: <c>.fv2</c> -> <c>&lt;name&gt;.fv2.xml</c>; <c>.fv2.xml</c> -> <c>&lt;name&gt;.fv2</c>.
-/// </summary>
 public static class Fv2Converter
 {
-    /// <summary>Decompile a .fv2 to <c>&lt;name&gt;.fv2.xml</c>. Returns the xml path.</summary>
     public static string Unpack(string fv2Path)
     {
         var outPath = fv2Path + ".xml";
@@ -27,7 +23,6 @@ public static class Fv2Converter
         return outPath;
     }
 
-    /// <summary>Recompile a <c>&lt;name&gt;.fv2.xml</c> back to <c>&lt;name&gt;.fv2</c>. Returns the fv2 path.</summary>
     public static string Pack(string xmlPath)
     {
         var outPath = xmlPath.Substring(0, xmlPath.Length - ".xml".Length);

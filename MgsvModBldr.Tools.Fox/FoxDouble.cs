@@ -1,3 +1,4 @@
+// Fox double property value
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;

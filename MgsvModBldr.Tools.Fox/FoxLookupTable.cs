@@ -1,3 +1,4 @@
+// Class/property name lookup table
 using System.Collections.Generic;
 
 namespace MgsvModBldr.Tools.Fox

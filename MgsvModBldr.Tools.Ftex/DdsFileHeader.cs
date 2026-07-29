@@ -1,3 +1,4 @@
+// DDS file header
 using System;
 using System.IO;
 using System.Text;

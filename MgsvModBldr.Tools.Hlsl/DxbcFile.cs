@@ -1,14 +1,8 @@
+// DXBC container chunk reader
 using System.Text;
 
 namespace MgsvModBldr.Tools.Hlsl;
 
-/// <summary>
-/// Minimal DXBC container reader — just enough to locate chunks (we want
-/// the SDBG debug chunk that carries the embedded HLSL source).
-/// Layout: 'DXBC' + 16B checksum + uint version + uint totalSize +
-/// uint chunkCount + uint[chunkCount] chunkOffsets; each chunk = FourCC +
-/// uint size + payload.
-/// </summary>
 public sealed class DxbcFile
 {
     public byte[] Bytes { get; }
@@ -31,7 +25,6 @@ public sealed class DxbcFile
 
     public static DxbcFile Read(string path) => new(File.ReadAllBytes(path));
 
-    /// <summary>Payload (offset,size) of a chunk by FourCC, or null.</summary>
     public (int offset, int size)? Chunk(string fourCC)
     {
         foreach (var (cc, off, size) in Chunks)

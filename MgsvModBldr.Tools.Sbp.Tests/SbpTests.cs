@@ -1,3 +1,4 @@
+// Sbp tool regression gate
 using MgsvModBldr.Tools.Sbp;
 using MgsvModBldr.Tools.Testing;
 using static MgsvModBldr.Tools.Testing.TestHelpers;
@@ -5,13 +6,6 @@ using static MgsvModBldr.Tools.Testing.TestEnv;
 
 namespace MgsvModBldr.Tools.Sbp.Tests;
 
-/// <summary>
-/// Sbp (.sbp sound-bank package) gate: byte-exact round-trip vs the
-/// ORIGINAL game file. .sbp is a flat lossless container (SBPL header +
-/// 12-byte entry table + 16-aligned data blocks), so unpack→repack must
-/// reproduce the source byte-for-byte. Samples: Z:\tpp\release\sound\
-/// asset\#Win\*.sbp and the mod-builder tmp.
-/// </summary>
 public sealed class SbpTests : IToolTests
 {
     public string Name => "sbp";

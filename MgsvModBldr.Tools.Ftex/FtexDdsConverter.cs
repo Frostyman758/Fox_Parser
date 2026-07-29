@@ -1,3 +1,4 @@
+// ftex <-> DDS conversion core
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -205,19 +206,6 @@ namespace MgsvModBldr.Tools.Ftex
             }
         }
 
-        /// <remarks>
-        /// I derived this algorithm via decision tree learning the TPP data set. (with sklearn)
-        /// 
-        /// The features that I used (<c>fileSize</c> and <c>mipMapCount</c>) had to be available in
-        /// the DDS files that FtexTool generates. 
-        /// That means that some custom Ftex flags can't be used to determine the amount of .ftexs files.
-        /// Having no access to flags such as <see cref="FtexFile.UnknownFlags"/> means that this
-        /// algorithm can't correctly classify that a .ftex file has more than 3 .ftexs files.
-        /// 
-        /// Stats:
-        ///       Predicts ~99,90% of the .ftexs file counts correctly. (The previos algorithm only got 44,00% correct.)
-        ///       Of the ~0,10% incorrect predictions ~97,00% predict a too small ftexs file count.
-        /// </remarks>
         private static byte GetFtexsFileCount(int fileSize, int mipMapCount)
         {
             if (fileSize <= 76456)

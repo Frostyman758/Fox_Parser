@@ -1,3 +1,4 @@
+// Creates property containers by type
 using System;
 using System.IO;
 using MgsvModBldr.Tools.Fox.Types;

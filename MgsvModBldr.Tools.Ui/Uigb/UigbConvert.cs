@@ -9,11 +9,6 @@ public static class UigbConvert
 {
     const uint SetTextStr32 = 2414984170;   // UiActSetTextNode
 
-    /// <summary>
-    /// Ids truncate, paths hash, layout entries widen 8→12 B, SetText params
-    /// narrow their 4×u32 tail to 4×u8 in place (parB 72→64, pool keeps 8
-    /// slack bytes so no offsets move). Edge slab byte-copied; writer rebases.
-    /// </summary>
     public static UigbFile GzToTpp(UigbFile gz)
     {
         if (gz.IsTpp) throw new ArgumentException("already TPP");

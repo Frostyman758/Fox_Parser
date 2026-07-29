@@ -14,14 +14,6 @@ public sealed class FpkEntry
     public byte[]     Data       { get; set; } = Array.Empty<byte>();
     public bool       Encrypted  { get; set; }
 
-    /// <summary>
-    /// True once <see cref="Data"/> holds this entry's authoritative content
-    /// (set by <see cref="ReadData"/>). Distinguishes a legitimately EMPTY
-    /// 0-byte file from an entry whose data still needs loading from disk —
-    /// <see cref="FpkFile.Write"/> only falls back to a disk read when this is
-    /// false, so empty inner files (e.g. 0-byte .fcnp) survive an in-memory
-    /// merge instead of triggering a spurious "file not found".
-    /// </summary>
     public bool       Loaded     { get; set; }
 
     public const int EntrySize = 4 * 4 + FpkString.HeaderSize + 16; // 48

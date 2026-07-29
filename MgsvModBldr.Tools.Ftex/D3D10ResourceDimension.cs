@@ -1,3 +1,4 @@
+// D3D10 resource dimension enum
 namespace MgsvModBldr.Tools.Ftex.Dds.Enum
 {
     public enum D3D10ResourceDimension

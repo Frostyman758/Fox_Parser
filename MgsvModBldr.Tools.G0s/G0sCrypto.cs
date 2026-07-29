@@ -1,21 +1,12 @@
+// GZ QAR (.g0s) ciphers
 namespace MgsvModBldr.Tools.G0s;
 
-/// <summary>
-/// GZ QAR (.g0s) cryptography, ported verbatim from GzsTool 0.2
-/// (Utility/Encryption.cs). Both transforms are XOR keystreams and thus
-/// their own inverse: <see cref="DeEncryptQar"/> is the outer obfuscation
-/// keyed by the 16-byte block offset; <see cref="DeEncrypt"/> is the inner
-/// per-entry cipher keyed by a 32-bit key. All arithmetic is `unchecked`
-/// to reproduce the reference's wrapping int math exactly.
-/// </summary>
 internal static class G0sCrypto
 {
-    /// <summary>Magic that marks an inner-encrypted entry (after the outer pass).</summary>
     public const uint InnerKeyMagic = 0xA0F8EFE6;
 
     private static ulong ToULong(uint high, uint low) => ((ulong)high << 32) + low;
 
-    /// <summary>Outer obfuscation (symmetric). Mutates <paramref name="pData"/> in place and returns it.</summary>
     public static byte[] DeEncryptQar(byte[] pData, uint offset)
     {
         unchecked
@@ -67,7 +58,6 @@ internal static class G0sCrypto
     private static void ReplaceUInt(byte[] destinationArray, int offset, uint value) =>
         Buffer.BlockCopy(BitConverter.GetBytes(value), 0, destinationArray, offset, sizeof(uint));
 
-    /// <summary>Inner per-entry cipher (symmetric). Returns a new buffer.</summary>
     public static byte[] DeEncrypt(byte[] data, uint key)
     {
         unchecked

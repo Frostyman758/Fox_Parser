@@ -1,3 +1,4 @@
+// Fox float property value
 using System;
 using System.Collections.Generic;
 using System.Globalization;

@@ -1,3 +1,4 @@
+// fox2 binary reader/writer
 using System;
 using System.Collections.Generic;
 using System.Globalization;

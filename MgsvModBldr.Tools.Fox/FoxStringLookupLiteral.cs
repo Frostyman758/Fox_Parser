@@ -1,3 +1,4 @@
+// Lookup-table string literal entry
 using System.IO;
 using System.Text;
 

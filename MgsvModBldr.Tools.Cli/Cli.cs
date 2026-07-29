@@ -1,3 +1,4 @@
+// modbldr-tools CLI dispatch + interactive fox shell
 using System.Diagnostics;
 using System.Security.Cryptography;
 using MgsvModBldr.Tools.Fox;
@@ -121,11 +122,14 @@ public static class Cli
 
     private enum LogoMode { None, Animate, Repaint }
 
-    /// <summary>
-    /// Parse the conversion flags + positional input and dispatch. The fox is
-    /// drawn out (one-shot) or recoloured in place (interactive) per
-    /// <paramref name="logo"/>. Errors surface as FOXDIE.
-    /// </summary>
+    // Verbs Run() dispatches on — kept in sync with the branches above.
+    private static readonly string[] CommandVerbs =
+    {
+        "hash", "foxhash", "unhash", "lookup", "pathcode", "stringid",
+        "buildmgsv", "update-dicts", "updatedicts", "update-dictionaries",
+        "gzui", "test",
+    };
+
     private static int ExecuteFileOp(string[] args, LogoMode logo)
     {
         bool roundtrip = false, hlslFiles = false, stpGz = false;
@@ -169,12 +173,6 @@ public static class Cli
         }
     }
 
-    /// <summary>
-    /// The interactive fox shell. Draws the fox once, then loops reading a
-    /// path (or a quoted path dropped into the window) per line; each command
-    /// recolours the SAME fox in place and prints its result below. Type
-    /// help / clear / exit. Plain commands only — no flags juggling.
-    /// </summary>
     private static int Interactive()
     {
         try { Console.Clear(); } catch { /* some hosts disallow */ }
@@ -207,7 +205,13 @@ public static class Cli
                 continue;
             }
 
-            ExecuteFileOp(Tokenize(line), LogoMode.Repaint);
+            // Subcommands (hash, update-dicts, test, ...) work at the prompt
+            // too — route them through Run; only paths go to file conversion.
+            var toks = Tokenize(line);
+            if (toks.Length > 0 && CommandVerbs.Contains(toks[0], StringComparer.OrdinalIgnoreCase))
+                Run(toks);
+            else
+                ExecuteFileOp(toks, LogoMode.Repaint);
         }
 
         Console.ResetColor();
@@ -215,7 +219,6 @@ public static class Cli
         return 0;
     }
 
-    /// <summary>Split a shell line into tokens, honouring "double quotes" (paths with spaces / drag-drop).</summary>
     private static string[] Tokenize(string line)
     {
         var tokens = new List<string>();
@@ -234,10 +237,6 @@ public static class Cli
         return tokens.ToArray();
     }
 
-    /// <summary>
-    /// Map an input path to its tool key (for the splash colour). Mirrors
-    /// the dispatch routing; falls back to the default colour when unknown.
-    /// </summary>
     private static string ToolNameFor(string input)
     {
         if (Directory.Exists(input))

@@ -1,3 +1,4 @@
+// .ftexs sidecar reader/writer
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;

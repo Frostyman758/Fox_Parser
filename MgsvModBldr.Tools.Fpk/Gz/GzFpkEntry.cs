@@ -1,4 +1,5 @@
-// GZ fpk entry — SEPARATE from the TPP FpkEntry. One 48-byte record:
+// GZ fpk entry record
+// Separate from the TPP FpkEntry. One 48-byte record:
 //   data offset/size (16B) + GzFpkString header (16B) + path MD5 (16B).
 // The file data lives at DataOffset for DataSize bytes and is kept verbatim:
 // GZ fpk data is not path-key-encrypted (GzsTool 0.2 reads it raw too), so the
@@ -12,6 +13,7 @@ public sealed class GzFpkEntry
     public const int RecordSize = 48;
 
     public string FilePath => _name.Path;
+    public bool Resolved => _name.Resolved;
     public byte[] Data { get; private set; } = System.Array.Empty<byte>();
 
     private readonly GzFpkString _name = new();

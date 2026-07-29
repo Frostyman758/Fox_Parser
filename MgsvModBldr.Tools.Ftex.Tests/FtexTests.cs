@@ -1,3 +1,4 @@
+// Ftex tool regression gate
 using System.Diagnostics;
 using MgsvModBldr.Tools.Ftex;
 using MgsvModBldr.Tools.Testing;
@@ -6,13 +7,6 @@ using static MgsvModBldr.Tools.Testing.TestEnv;
 
 namespace MgsvModBldr.Tools.Ftex.Tests;
 
-/// <summary>
-/// Ftex gate: ftex→dds must byte-match the FtexTool reference DDS
-/// (<c>&lt;stem&gt;.ref.dds</c>, produced by FtexToolRef during harvest),
-/// plus dds→ftex→dds round-trip stability. The .ftex side is NOT
-/// byte-exact (SharpZipLib vs ZLibStream emit different valid deflate),
-/// so the meaningful gate is "decompressed pixel bytes round-trip equal".
-/// </summary>
 public sealed class FtexTests : IToolTests
 {
     public string Name => "ftex";
@@ -80,12 +74,6 @@ public sealed class FtexTests : IToolTests
                         .ToList();
     }
 
-    /// <summary>
-    /// Ftex samples (.ftex + .N.ftexs sidecars) live LOOSE under the
-    /// asset trees on Z:\ (e.g. <c>Z:\tpp\release\weapon\.../Pictures/#windx11/</c>).
-    /// Picks samples with varying sidecar counts so we exercise
-    /// different mipmap-chain shapes.
-    /// </summary>
     public void Harvest()
     {
         var dst = Path.Combine(FixturesDir, "ftex");
@@ -143,12 +131,6 @@ public sealed class FtexTests : IToolTests
         catch { return 0; }
     }
 
-    /// <summary>
-    /// Run FtexToolRef (Atvaark's original) on a staged .ftex to produce
-    /// <c>&lt;stem&gt;.ref.dds</c> — the byte-compare reference. Locate it
-    /// via the FTEXREF env var (path to FtexToolRef.dll) or the default
-    /// build path. If absent, the gate falls back to round-trip only.
-    /// </summary>
     private static void GenerateReference(string stagedFtex, string stem)
     {
         var refDll = Environment.GetEnvironmentVariable("FTEXREF");

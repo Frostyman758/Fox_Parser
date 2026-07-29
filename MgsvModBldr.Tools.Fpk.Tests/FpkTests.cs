@@ -1,3 +1,4 @@
+// Fpk tool regression gate
 using System.Diagnostics;
 using MgsvModBldr.Tools.Fpk;
 using MgsvModBldr.Tools.Testing;
@@ -6,11 +7,6 @@ using static MgsvModBldr.Tools.Testing.TestEnv;
 
 namespace MgsvModBldr.Tools.Fpk.Tests;
 
-/// <summary>
-/// FPK/FPKD gate, same as QAR: (A) extraction byte-matches datfpk
-/// reference, (B) pack round-trip (repack → re-extract → byte-identical).
-/// Fixtures: &lt;fixtures&gt;/fpk/&lt;name&gt; + &lt;name&gt;_ref/ (datfpk extraction).
-/// </summary>
 public sealed class FpkTests : IToolTests
 {
     public string Name => "fpk";
@@ -70,13 +66,6 @@ public sealed class FpkTests : IToolTests
         finally { TryDelete(work); }
     }
 
-    /// <summary>
-    /// Harvests a mix of FPK (asset) + FPKD (definition) from
-    /// Z:\tpp\release\pack, plus datfpk's own testdata archives that
-    /// contain ENCRYPTED entries (the only reliable way to exercise
-    /// FpkCrypto). datfpk IGNORES the output-dir arg for fpk(d) and
-    /// extracts next to the input; we move that to the _ref location.
-    /// </summary>
     public void Harvest()
     {
         var dst = Path.Combine(FixturesDir, "fpk");

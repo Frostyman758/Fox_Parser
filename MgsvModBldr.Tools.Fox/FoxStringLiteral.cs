@@ -1,3 +1,4 @@
+// Inline string literal entry
 using System;
 using System.IO;
 

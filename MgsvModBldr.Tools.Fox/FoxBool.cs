@@ -1,3 +1,4 @@
+// Fox bool property value
 using System.Collections.Generic;
 using System.IO;
 using System.Text;

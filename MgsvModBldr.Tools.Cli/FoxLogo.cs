@@ -1,15 +1,8 @@
+// ASCII fox splash + console colours
 using System.Text;
 
 namespace MgsvModBldr.Tools.Cli;
 
-/// <summary>
-/// The FOX splash. Loads the ASCII fox from the loose fox_logo.txt next to
-/// the exe; if that file is missing the exe still runs (a tiny built-in
-/// fallback is used). Rendered instantly on launch, "drawn out" line-by-line
-/// in a per-tool colour as one-shot feedback, or recoloured in place in the
-/// interactive shell. Geometry never changes — only the colour shifts per
-/// tool. Skipped when stdout is redirected so scripted output stays clean.
-/// </summary>
 internal static class FoxLogo
 {
     public static readonly ConsoleColor DefaultColor = ConsoleColor.DarkYellow; // Fox Engine orange
@@ -47,11 +40,6 @@ internal static class FoxLogo
         return new[] { "", "  ███  F O X  ███", "" };
     }
 
-    /// <summary>
-    /// Render width (chars) for the splash. The art file stays full-res;
-    /// it's downscaled to this on display so the fox shows compact without
-    /// the terminal having to be zoomed out. Override with FOX_LOGO_WIDTH.
-    /// </summary>
     private static int TargetWidth()
     {
         var env = Environment.GetEnvironmentVariable("FOX_LOGO_WIDTH");
@@ -128,7 +116,6 @@ internal static class FoxLogo
         try { Console.OutputEncoding = Encoding.UTF8; } catch { /* non-tty */ }
     }
 
-    /// <summary>Print the logo instantly (launch splash).</summary>
     public static void Show(ConsoleColor color)
     {
         if (Console.IsOutputRedirected) return;
@@ -138,11 +125,6 @@ internal static class FoxLogo
         finally { Console.ForegroundColor = prev; }
     }
 
-    /// <summary>
-    /// Reveal the logo line-by-line in <paramref name="color"/> as run
-    /// feedback. No-op when redirected. Paced gently; quick enough to feel
-    /// like a flourish, not a wait.
-    /// </summary>
     public static void DrawOut(ConsoleColor color)
     {
         if (Console.IsOutputRedirected) return;
@@ -161,12 +143,6 @@ internal static class FoxLogo
         Console.WriteLine();
     }
 
-    /// <summary>
-    /// Interactive recolour: clear the screen and redraw the SAME fox in a
-    /// new colour at the top, so the existing logo appears to just change
-    /// colour rather than a new one being spawned. Leaves the cursor on a
-    /// blank line below the fox, ready for command output.
-    /// </summary>
     public static void Repaint(ConsoleColor color)
     {
         if (Console.IsOutputRedirected) return;
@@ -178,7 +154,6 @@ internal static class FoxLogo
         Console.WriteLine();
     }
 
-    /// <summary>True when the console can host the interactive fox shell.</summary>
     public static bool CanGoInteractive =>
         !Console.IsInputRedirected && !Console.IsOutputRedirected;
 }

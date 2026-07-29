@@ -2,7 +2,6 @@
 // 09/07/2026
 namespace MgsvModBldr.Tools.Ui.Uigb;
 
-/// <summary>One graph node: 6 B header + raw inline body (offsets rebased on write).</summary>
 public sealed class UigbNode
 {
     public ushort TypeIdx, NameIdx;
@@ -10,11 +9,6 @@ public sealed class UigbNode
     public byte[] Body = [];
 }
 
-/// <summary>
-/// Parsed .uigb. Section order (both versions): header, nodes, edge slab
-/// (in-edges/frefs/out-edges), layout table, section4, [section6 TPP],
-/// pool (links+params), str table, paths. See FORMATS.md.
-/// </summary>
 public sealed class UigbFile
 {
     public byte Version;                    // 0 GZ, 1 TPP

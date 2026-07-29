@@ -8,11 +8,6 @@ using static MgsvModBldr.Tools.Testing.TestEnv;
 
 namespace MgsvModBldr.Tools.Ui.Tests;
 
-/// <summary>
-/// Gates: (A) uilb byte-identical read→write round-trip, GZ + TPP corpora;
-/// (B) GZ→TPP conversion output re-parses as TPP with matching counts.
-/// Fixtures: &lt;fixtures&gt;\ui\ui format examples\uilb\PC {GZ,TPP}.
-/// </summary>
 public sealed class UiTests : IToolTests
 {
     public string Name => "ui";

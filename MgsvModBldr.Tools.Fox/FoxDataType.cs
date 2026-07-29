@@ -1,8 +1,6 @@
+// fox::PropertyInfo::Type enum
 namespace MgsvModBldr.Tools.Fox.Types
 {
-    /// <summary>
-    ///     fox::PropertyInfo::Type
-    /// </summary>
     public enum FoxDataType
     {
         FoxInt8 = 0,

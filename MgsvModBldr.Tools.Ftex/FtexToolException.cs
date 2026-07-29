@@ -1,3 +1,4 @@
+// Ftex tool exception base
 using System;
 
 namespace MgsvModBldr.Tools.Ftex.Exceptions

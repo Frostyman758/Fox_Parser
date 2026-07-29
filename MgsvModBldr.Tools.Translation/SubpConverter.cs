@@ -6,16 +6,6 @@ using MgsvModBldr.Tools.Translation.Subp;
 
 namespace MgsvModBldr.Tools.Translation;
 
-/// <summary>
-/// Façade for the Fox Engine subtitle pack (.subp) format. Mirrors
-/// Atvaark's SubpTool exactly: unpack writes the XmlSerializer output
-/// (NewLineHandling.Entitize, Indent) byte-for-byte, pack reads it back.
-///
-/// In the unified toolset the companion file is named
-/// <c>&lt;name&gt;.subp.xml</c> (format-suffixed, matching the .fpk.json /
-/// .dat.json convention) so it is unambiguous from Fox's bare .xml. The
-/// XML *content* is identical to SubpTool's <c>&lt;name&gt;.xml</c>.
-/// </summary>
 public static class SubpConverter
 {
     static SubpConverter()
@@ -25,12 +15,6 @@ public static class SubpConverter
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
     }
 
-    /// <summary>
-    /// Maps SubpTool's language switch to its encoding. Default
-    /// (and -eng/-fre/-ger/-ita/-spa) is ISO-8859-1, which is also
-    /// binary-safe: every byte 0x00-0xFF round-trips, so it preserves
-    /// the original bytes for any language.
-    /// </summary>
     public static Encoding ResolveEncoding(string languageOption)
     {
         switch (languageOption)
@@ -51,7 +35,6 @@ public static class SubpConverter
         }
     }
 
-    /// <summary>Unpack a .subp to <c>&lt;name&gt;.subp.xml</c>. Returns the xml path.</summary>
     public static string Unpack(string subpPath, Encoding encoding = null)
     {
         encoding ??= ResolveEncoding("");
@@ -71,7 +54,6 @@ public static class SubpConverter
         return outPath;
     }
 
-    /// <summary>Pack a <c>&lt;name&gt;.subp.xml</c> back to <c>&lt;name&gt;.subp</c>. Returns the subp path.</summary>
     public static string Pack(string xmlPath, Encoding encoding = null)
     {
         encoding ??= ResolveEncoding("");

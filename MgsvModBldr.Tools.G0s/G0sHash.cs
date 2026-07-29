@@ -1,15 +1,8 @@
+// GZ path hashing + name resolution
 using MgsvModBldr.Core;
 
 namespace MgsvModBldr.Tools.G0s;
 
-/// <summary>
-/// GZ QAR path hashing + filename resolution, ported from GzsTool 0.2
-/// (Utility/Hashing.cs). Uses the legacy CityHash (Core.CityHash64 — the
-/// same variant as the CityHash.Net.Legacy DLL GzsTool shipped) so hashes
-/// match the game byte-for-byte. The GZ type-extension table differs from
-/// TPP's, hence its own copy here. The dictionary (gzs_dictionary.txt) maps
-/// the 48-bit path hash back to the extension-less path.
-/// </summary>
 public static class G0sHash
 {
     // GZ extension table (typeId -> extension). typeId is stored in hash>>52.
@@ -30,7 +23,6 @@ public static class G0sHash
 
     public const ulong HashMask = 0xFFFFFFFFFFFF; // 48-bit
 
-    /// <summary>HashFileName: CityHash64 of the extension-less path (+NUL), seeded by length/first char, masked to 48 bits.</summary>
     public static ulong HashFileName(string text)
     {
         const ulong seed0 = 0x9ae16a3b2f90404fUL;
@@ -38,7 +30,6 @@ public static class G0sHash
         return CityHash64.CityHash64WithSeeds(text + "\0", seed0, seed1) & HashMask;
     }
 
-    /// <summary>Full hash for a path WITH extension: hashes the stem, then folds the typeId into bits 52+.</summary>
     public static ulong HashFileNameWithExtension(string filePath)
     {
         int typeId = 0;
@@ -69,14 +60,6 @@ public static class G0sHash
     private static Dictionary<ulong, string> _dict;
     private static string _dictDir;
 
-    /// <summary>
-    /// Explicit directory to look for gzs_dictionary.txt in. Hosts whose
-    /// <see cref="AppContext.BaseDirectory"/> isn't their own folder — e.g. a
-    /// NativeAOT library loaded into another process (explorer.exe) — set this
-    /// so the dictionary is still found. Null (default) uses
-    /// AppContext.BaseDirectory, preserving the original behaviour. Setting it
-    /// drops the cached dictionary so the next lookup reloads.
-    /// </summary>
     public static string DictionaryDirectory
     {
         get => _dictDir;
@@ -109,12 +92,6 @@ public static class G0sHash
         return File.Exists(inDict) ? inDict : Path.Combine(baseDir, name);
     }
 
-    /// <summary>
-    /// Resolve a 64-bit entry hash to its on-disk file path (with extension).
-    /// Mirrors GzsTool 0.2 TryGetFileNameFromHash: dictionary stem (or hex of
-    /// the 48-bit hash) + the typeId's extension. Returns whether the name was
-    /// found in the dictionary.
-    /// </summary>
     public static bool TryResolve(ulong hash, out string filePath)
     {
         int extId = (int)(hash >> 52 & 0xFFFF);

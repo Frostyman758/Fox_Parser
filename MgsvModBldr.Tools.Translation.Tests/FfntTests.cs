@@ -1,3 +1,4 @@
+// Ffnt tool regression gate
 using System.Diagnostics;
 using MgsvModBldr.Tools.Translation;
 using MgsvModBldr.Tools.Testing;
@@ -6,16 +7,6 @@ using static MgsvModBldr.Tools.Testing.TestEnv;
 
 namespace MgsvModBldr.Tools.Translation.Tests;
 
-/// <summary>
-/// Ffnt (.ffnt bitmap font) gate. The format is losslessly invertible:
-///   (A) round-trip vs the ORIGINAL game file — my unpack→repack must
-///       byte-match the original .ffnt (ground truth).
-///   (B) my XML byte-matches FfntTool's XML (cached <c>&lt;name&gt;.ffnt.ref.xml</c>).
-/// The font bitmap is carried via cross-platform grayscale PNG layers
-/// (the reference used GDI+); PNG container bytes differ from FfntTool's
-/// but the pixels — and the reconstructed .ffnt — are identical (Ftex
-/// precedent). Samples are loose under Z:\tpp\release\font\#Win.
-/// </summary>
 public sealed class FfntTests : IToolTests
 {
     public string Name => "ffnt";
@@ -79,10 +70,6 @@ public sealed class FfntTests : IToolTests
                         .ToList();
     }
 
-    /// <summary>
-    /// Ffnt files sit loose under <c>Z:\tpp\release\font\#Win</c>. Copy
-    /// each into a hash-keyed bucket and cache the FfntTool reference XML.
-    /// </summary>
     public void Harvest()
     {
         var dst = Path.Combine(FixturesDir, "ffnt");
@@ -107,12 +94,6 @@ public sealed class FfntTests : IToolTests
         catch (Exception ex) { Console.WriteLine($"  Ffnt harvest failed: {ex.Message}"); }
     }
 
-    /// <summary>
-    /// Run FfntToolRef (Atvaark's original, GDI+, Windows-only) to cache
-    /// <c>&lt;name&gt;.ffnt.ref.xml</c>. The reference writes
-    /// <c>&lt;stem&gt;/&lt;stem&gt;.xml</c> (a folder); we lift the xml out and
-    /// drop the folder. Locate via FFNTREF env or the default build path.
-    /// </summary>
     private static void GenerateReference(string stagedFfnt)
     {
         var refDll = Environment.GetEnvironmentVariable("FFNTREF");

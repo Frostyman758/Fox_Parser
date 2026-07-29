@@ -1,3 +1,4 @@
+// Switch enum property value
 using System.Collections.Generic;
 
 namespace MgsvModBldr.Tools.Fox.Enums

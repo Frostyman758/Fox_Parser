@@ -1,19 +1,8 @@
+// .stp/.sab unpack/repack facade
 namespace MgsvModBldr.Tools.Stp;
 
-/// <summary>
-/// Directory-in / file-out unpack+repack for .stp / .sab, faithful to the
-/// reference StpTool: unpack dumps hash-named sub-files into a folder, and
-/// repack re-imports them straight from the folder (entry order = directory
-/// enumeration order, exactly like the reference). There is deliberately NO
-/// manifest or stored order — editing/adding/removing files in the folder
-/// changes the repacked output, just as it does with the original tool.
-///
-/// .bnk is a Wwise SoundBank — the reference only DUMPS its embedded data
-/// (no repacker), so it is out of scope for this byte-exact toolset.
-/// </summary>
 public static class StpPacker
 {
-    /// <summary>Unpack a .stp/.sab into <c>&lt;name&gt;_&lt;ext&gt;/</c>; returns the folder.</summary>
     public static string Unpack(string path)
     {
         var ext = Path.GetExtension(path).TrimStart('.').ToLowerInvariant();
@@ -46,13 +35,6 @@ public static class StpPacker
         return dir;
     }
 
-    /// <summary>
-    /// Repack a folder into a .stp or .sab. Whether it is .stp or .sab is
-    /// inferred from the folder-name suffix (…_stp / …_sab), mirroring the
-    /// reference. <paramref name="version"/> selects GZ vs TPP for .stp
-    /// (the reference defaults to TPP; -gz selects GZ); .sab ignores it.
-    /// Entry order follows <see cref="Directory.GetFiles(string,string,SearchOption)"/>.
-    /// </summary>
     public static string Pack(string dir, StpVersion version = StpVersion.TPP)
     {
         dir = dir.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);

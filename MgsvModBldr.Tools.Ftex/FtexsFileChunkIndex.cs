@@ -1,3 +1,4 @@
+// ftexs chunk index entry
 using System;
 using System.IO;
 

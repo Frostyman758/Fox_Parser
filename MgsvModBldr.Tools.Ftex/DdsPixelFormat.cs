@@ -1,3 +1,4 @@
+// DDS pixel format block
 using System;
 using System.IO;
 using System.Text;

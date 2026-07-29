@@ -1,37 +1,33 @@
+// update-dicts: refresh dict/ from mgsv-lookup-strings
 using System.Net.Http;
 
 namespace MgsvModBldr.Tools.Cli;
 
-/// <summary>
-/// Refreshes the string dictionaries in <c>dict/</c> from caplag's
-/// mgsv-lookup-strings repo (default) or a custom fork (<c>-repo</c>).
-/// Downloads in parallel and only rewrites files whose bytes changed.
-/// The mapping below tracks the repo's layout / naming (which differs from
-/// our older-tool dict names — e.g. spch_labelname -> spch_label, and the
-/// FNV-hashed voiceevent/voiceid -> our spch_fnv_* names).
-/// </summary>
 internal static class DictUpdater
 {
     private const string DefaultRepo = "kapuragu/mgsv-lookup-strings";
     private const string DefaultBranch = "master";
 
-    // (our dict/ filename, path within the repo)
-    private static readonly (string local, string remote)[] Map =
+    // (our dict/ filename, path within the repo, merge instead of replace)
+    // merge: union remote lines into the local file — for dicts where our
+    // local copy has entries upstream lacks (losing them breaks resolution).
+    private static readonly (string local, string remote, bool merge)[] Map =
     {
-        ("qar_dictionary.txt",                "GzsTool/qar_dictionary.txt"),
-        ("gzs_dictionary.txt",                "GzsTool/gzs_dictionary.txt"),
-        ("lang_dictionary.txt",               "LangTool/lang_dictionary.txt"),
-        ("mtar_dictionary.txt",               "MtarTool/mtar_dictionary.txt"),
-        ("spch_label_dictionary.txt",         "spch/Dictionaries/spch_labelname_dictionary.txt"),
-        ("spch_voicetype_dictionary.txt",     "spch/Dictionaries/spch_voicetype_dictionary.txt"),
-        ("spch_anim_dictionary.txt",          "spch/Dictionaries/spch_animationact_dictionary.txt"),
-        ("spch_fnv_voiceevent_dictionary.txt","spch/Dictionaries/spch_voiceevent_dictionary.txt"),
-        ("spch_fnv_voiceid_dictionary.txt",   "spch/Dictionaries/spch_voiceid_dictionary.txt"),
-        ("rdf_label_dictionary.txt",          "rdf/Dictionaries/rdf_labelname_dictionary.txt"),
-        ("rdf_optionalset_dictionary.txt",    "rdf/Dictionaries/rdf_optionalsetname_dictionary.txt"),
-        ("rdf_dialogueevent_dictionary.txt",  "rdf/Dictionaries/rdf_dialogueevent_dictionary.txt"),
-        ("rdf_voicetype_dictionary.txt",      "rdf/Dictionaries/rdf_voicetype_dictionary.txt"),
-        ("rdf_voiceid_dictionary.txt",        "rdf/Dictionaries/rdf_voiceid_dictionary.txt"),
+        ("qar_dictionary.txt",                "GzsTool/qar_dictionary.txt",                        false),
+        ("gzs_dictionary.txt",                "GzsTool/gzs_dictionary.txt",                        false),
+        ("fpk_dictionary.txt",                "fpk/fpk_dictionary.txt",                            true),
+        ("lang_dictionary.txt",               "LangTool/lang_dictionary.txt",                      false),
+        ("mtar_dictionary.txt",               "MtarTool/mtar_dictionary.txt",                      false),
+        ("spch_label_dictionary.txt",         "spch/Dictionaries/spch_labelname_dictionary.txt",   false),
+        ("spch_voicetype_dictionary.txt",     "spch/Dictionaries/spch_voicetype_dictionary.txt",   false),
+        ("spch_anim_dictionary.txt",          "spch/Dictionaries/spch_animationact_dictionary.txt",false),
+        ("spch_fnv_voiceevent_dictionary.txt","spch/Dictionaries/spch_voiceevent_dictionary.txt",  false),
+        ("spch_fnv_voiceid_dictionary.txt",   "spch/Dictionaries/spch_voiceid_dictionary.txt",     false),
+        ("rdf_label_dictionary.txt",          "rdf/Dictionaries/rdf_labelname_dictionary.txt",     false),
+        ("rdf_optionalset_dictionary.txt",    "rdf/Dictionaries/rdf_optionalsetname_dictionary.txt",false),
+        ("rdf_dialogueevent_dictionary.txt",  "rdf/Dictionaries/rdf_dialogueevent_dictionary.txt", false),
+        ("rdf_voicetype_dictionary.txt",      "rdf/Dictionaries/rdf_voicetype_dictionary.txt",     false),
+        ("rdf_voiceid_dictionary.txt",        "rdf/Dictionaries/rdf_voiceid_dictionary.txt",       false),
     };
 
     public static int Run(string repoSpec, string destDir = null)
@@ -55,15 +51,28 @@ internal static class DictUpdater
                 int idx = i;
                 tasks[idx] = Task.Run(async () =>
                 {
-                    var (local, remote) = Map[idx];
+                    var (local, remote, merge) = Map[idx];
                     var url = $"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{remote}";
                     try
                     {
                         var bytes = await http.GetByteArrayAsync(url);
                         var dst = Path.Combine(dictDir, local);
-                        bool changed = !File.Exists(dst) || !File.ReadAllBytes(dst).AsSpan().SequenceEqual(bytes);
-                        if (changed) File.WriteAllBytes(dst, bytes);
-                        results[idx] = (local, changed ? $"updated ({bytes.Length:N0} B)" : "unchanged", true);
+                        if (merge && File.Exists(dst))
+                        {
+                            var have = File.ReadAllLines(dst);
+                            var seen = new HashSet<string>(have, StringComparer.Ordinal);
+                            var add = new List<string>();
+                            foreach (var l in RemoteLines(bytes))
+                                if (l.Length > 0 && seen.Add(l)) add.Add(l);
+                            if (add.Count > 0) File.WriteAllLines(dst, have.Concat(add));
+                            results[idx] = (local, add.Count > 0 ? $"merged (+{add.Count} lines)" : "unchanged", true);
+                        }
+                        else
+                        {
+                            bool changed = !File.Exists(dst) || !File.ReadAllBytes(dst).AsSpan().SequenceEqual(bytes);
+                            if (changed) File.WriteAllBytes(dst, bytes);
+                            results[idx] = (local, changed ? $"updated ({bytes.Length:N0} B)" : "unchanged", true);
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -82,10 +91,10 @@ internal static class DictUpdater
         int updated = 0, unchanged = 0, failed = 0;
         foreach (var (name, status, ok) in results)
         {
-            Console.WriteLine($"  {(ok ? (status.StartsWith("updated") ? "[+]" : "[=]") : "[!]")} {name,-36} {status}");
+            Console.WriteLine($"  {(ok ? (status == "unchanged" ? "[=]" : "[+]") : "[!]")} {name,-36} {status}");
             if (!ok) failed++;
-            else if (status.StartsWith("updated")) updated++;
-            else unchanged++;
+            else if (status == "unchanged") unchanged++;
+            else updated++;
         }
         Console.WriteLine($"Done: {updated} updated, {unchanged} unchanged, {failed} failed.");
         return failed == 0 ? 0 : 1;
@@ -123,6 +132,10 @@ internal static class DictUpdater
         var seg = ownerRepo.Split('/', StringSplitOptions.RemoveEmptyEntries);
         return seg.Length >= 2 ? (seg[0], seg[1], branch) : ("kapuragu", "mgsv-lookup-strings", branch);
     }
+
+    private static IEnumerable<string> RemoteLines(byte[] bytes)
+        => System.Text.Encoding.UTF8.GetString(bytes)
+            .Split('\n').Select(l => l.TrimEnd('\r'));
 
     private static string Innermost(Exception ex)
     {

@@ -5,19 +5,6 @@ using MgsvModBldr.Tools.Translation.Ffnt;
 
 namespace MgsvModBldr.Tools.Translation;
 
-/// <summary>
-/// Façade for the Fox Engine bitmap font (.ffnt) format. Mirrors
-/// Atvaark's FfntTool: unpack writes the glyph/metadata XML plus the
-/// font bitmap split into up to 8 single-bit layer PNGs; pack reads the
-/// XML and ORs the layer PNGs back into the bitmap.
-///
-/// The reference used System.Drawing for the PNGs (Windows-only); we use
-/// a small cross-platform codec (see <see cref="Png"/>). The PNG
-/// container bytes therefore differ from FfntTool's, but the pixels —
-/// and the reconstructed .ffnt — are identical (same precedent as Ftex's
-/// deflate streams). CLI: <c>.ffnt</c> -> <c>&lt;name&gt;.ffnt.xml</c> +
-/// <c>&lt;stem&gt;_N.png</c>; <c>.ffnt.xml</c> -> <c>&lt;name&gt;.ffnt</c>.
-/// </summary>
 public static class FfntConverter
 {
     private const int MaxLayers = 8;
@@ -25,7 +12,6 @@ public static class FfntConverter
     private static XmlSerializer Serializer() =>
         new XmlSerializer(typeof(FfntFile), new[] { typeof(GlyphMap), typeof(FontData) });
 
-    /// <summary>Decompile a .ffnt to <c>&lt;name&gt;.ffnt.xml</c> + layer PNGs. Returns the xml path.</summary>
     public static string Unpack(string ffntPath)
     {
         var dir = Path.GetDirectoryName(ffntPath) ?? ".";
@@ -46,7 +32,6 @@ public static class FfntConverter
         return xmlPath;
     }
 
-    /// <summary>Recompile a <c>&lt;name&gt;.ffnt.xml</c> + layer PNGs to <c>&lt;name&gt;.ffnt</c>. Returns the ffnt path.</summary>
     public static string Pack(string xmlPath)
     {
         var outPath = xmlPath.Substring(0, xmlPath.Length - ".xml".Length); // <name>.ffnt

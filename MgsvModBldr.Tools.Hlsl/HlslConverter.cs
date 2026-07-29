@@ -1,32 +1,13 @@
+// .fxc embedded-source extractor
 using System.Text;
 using System.Text.RegularExpressions;
 
 namespace MgsvModBldr.Tools.Hlsl;
 
-/// <summary>
-/// Extracts the embedded HLSL source from an MGSV .fxc (DXBC) shader. The
-/// source lives in the SDBG debug chunk as a single NUL-terminated string
-/// (build path + preprocessed source with #line directives). It contains
-/// the original comments — including Shift-JIS (cp932) Japanese — which are
-/// preserved BYTE-FOR-BYTE (extract from the first #line to the NUL; NUL
-/// never occurs inside the text, so non-ASCII bytes pass through intact).
-///
-/// Two modes:
-///   <see cref="Unpack"/>      -> &lt;name&gt;.fxc.hlsl   (the preprocessed source blob)
-///   <see cref="UnpackFiles"/> -> &lt;name&gt;_src/...     (the original .shdr/.h files,
-///                                reconstructed from the #line directives)
-///
-/// Recompile (hlsl -> fxc) is a separate, non-byte-exact step (the
-/// sanctioned exception) — not in this file.
-/// </summary>
 public static class HlslConverter
 {
     private const int SdbgStringOffsetField = 20; // header int32 index -> string-heap offset
 
-    /// <summary>
-    /// The embedded preprocessed source as raw bytes (Shift-JIS-safe), or
-    /// null if the .fxc has no embedded source (no SDBG / no #line).
-    /// </summary>
     public static byte[] ExtractSourceBytes(byte[] fxc)
     {
         var dxbc = new DxbcFile(fxc);
@@ -72,7 +53,6 @@ public static class HlslConverter
         return bytes;
     }
 
-    /// <summary>Decompile a .fxc to <c>&lt;name&gt;.fxc.hlsl</c> (raw bytes; Japanese preserved). Null if no source.</summary>
     public static string Unpack(string fxcPath)
     {
         var fxc = File.ReadAllBytes(fxcPath);
@@ -94,12 +74,6 @@ public static class HlslConverter
         return outPath;
     }
 
-    /// <summary>
-    /// Recompile a <c>&lt;name&gt;.fxc.hlsl</c> back to <c>&lt;name&gt;.fxc</c> via D3DCompile.
-    /// Functional (game-loadable SM5 DXBC), NOT byte-identical to the
-    /// original — the sanctioned exception. Returns the .fxc path. Windows
-    /// only (throws PlatformNotSupportedException elsewhere).
-    /// </summary>
     public static string Recompile(string hlslPath)
     {
         var bytes = File.ReadAllBytes(hlslPath);
@@ -142,12 +116,6 @@ public static class HlslConverter
         return ($"{s}_main", $"{s}_5_0");
     }
 
-
-    /// <summary>
-    /// Reconstruct the original per-file source (.shdr/.h) from the #line
-    /// directives in the embedded blob. Returns (relativePath -> raw bytes),
-    /// or null if no source. Comments (incl. Japanese) are preserved.
-    /// </summary>
     public static Dictionary<string, byte[]> ExtractSourceFiles(byte[] fxc)
     {
         var src = ExtractSourceBytes(fxc);
@@ -194,7 +162,6 @@ public static class HlslConverter
         return result;
     }
 
-    /// <summary>Decompile a .fxc into a <c>&lt;name&gt;_src/</c> folder of original .shdr/.h files. Returns the folder, or null.</summary>
     public static string UnpackFiles(string fxcPath)
     {
         var files = ExtractSourceFiles(File.ReadAllBytes(fxcPath));

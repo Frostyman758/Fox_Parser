@@ -1,3 +1,4 @@
+// Enum property kinds
 namespace MgsvModBldr.Tools.Fox.Enums
 {
     internal enum FoxEnumType

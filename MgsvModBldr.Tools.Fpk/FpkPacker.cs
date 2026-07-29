@@ -6,7 +6,7 @@ namespace MgsvModBldr.Tools.Fpk;
 
 public static class FpkPacker
 {
-    private static readonly JsonSerializerOptions JsonOpts = new()
+    internal static readonly JsonSerializerOptions JsonOpts = new()
     {
         WriteIndented = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
@@ -15,6 +15,12 @@ public static class FpkPacker
 
     public static string Unpack(string fpkPath, string? outDir = null)
     {
+        // GZ (ste platform tag) routes to the read-only GZ unpacker.
+        Span<byte> head = stackalloc byte[10];
+        using (var sniff = File.OpenRead(fpkPath))
+            if (sniff.Read(head) == head.Length && Gz.GzFpkFile.IsGzMagic(head))
+                return Gz.GzFpkUnpacker.Unpack(fpkPath, outDir);
+
         outDir ??= DefaultUnpackDir(fpkPath);
         Directory.CreateDirectory(outDir);
 
@@ -52,6 +58,9 @@ public static class FpkPacker
         var manifest = JsonSerializer.Deserialize<FpkManifest>(File.ReadAllText(manifestPath), JsonOpts)
                        ?? throw new InvalidDataException("FPK manifest deserialise failed.");
 
+        if (manifest.Type.StartsWith("gz", StringComparison.OrdinalIgnoreCase))
+            throw new InvalidDataException("GZ fpk(d) is read-only — packing GZ archives is not supported.");
+
         outFile ??= StripJson(manifestPath);
         var baseDir = ContentDirFor(manifestPath);
 
@@ -72,7 +81,7 @@ public static class FpkPacker
         return outFile;
     }
 
-    private static string DefaultUnpackDir(string fpkPath)
+    internal static string DefaultUnpackDir(string fpkPath)
     {
         var stem = Path.GetFileNameWithoutExtension(fpkPath);
         var ext  = Path.GetExtension(fpkPath).TrimStart('.');
@@ -105,6 +114,8 @@ public sealed class FpkManifestEntry
 {
     [JsonPropertyName("filePath")]  public string FilePath  { get; set; } = "";
     [JsonPropertyName("encrypted")] [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool Encrypted { get; set; }
+    // GZ only: name not in fpk_dictionary, path synthesised from the MD5.
+    [JsonPropertyName("unresolved")] [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool Unresolved { get; set; }
 }
 
 public sealed class FpkManifestRef

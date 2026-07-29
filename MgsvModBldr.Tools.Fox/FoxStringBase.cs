@@ -1,3 +1,4 @@
+// Hashed string value base
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;

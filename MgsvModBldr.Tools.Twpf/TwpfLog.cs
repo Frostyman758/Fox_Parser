@@ -1,3 +1,4 @@
+// Twpf verbose logging switch
 namespace MgsvModBldr.Tools.Twpf
 {
     // Replaces the original tool's Program.IsVerbose so the vendored

@@ -1,3 +1,4 @@
+// Stp tool regression gate
 using System.Diagnostics;
 using MgsvModBldr.Tools.Stp;
 using MgsvModBldr.Tools.Sbp;
@@ -7,19 +8,6 @@ using static MgsvModBldr.Tools.Testing.TestEnv;
 
 namespace MgsvModBldr.Tools.Stp.Tests;
 
-/// <summary>
-/// Stp (.stp streamed-package / .sab streamed-animation) gate — byte-exact
-/// parity with the reference StpTool, BOTH directions:
-///   (A) our unpack produces the same files (names + bytes) as StpTool.
-///   (B) our repack of that folder byte-matches StpTool's repack.
-/// StpTool is directory-driven (entry order = Directory.GetFiles order), so
-/// it is lossy vs the game file — it re-orders entries on repack. The
-/// faithful contract is therefore reference-parity, NOT game-file parity
-/// (same as subp/lng/mtar). There is no manifest: order comes from the
-/// folder, so editing the extracted files changes the repack, exactly like
-/// the reference. .stp/.sab live inside .sbp; the harvester unpacks sbp to
-/// get them. Oracle: stpref (the StpTool, vendored verbatim).
-/// </summary>
 public sealed class StpTests : IToolTests
 {
     public string Name => "stp";
@@ -176,10 +164,6 @@ public sealed class StpTests : IToolTests
         finally { TryDelete(mineDir); }
     }
 
-    /// <summary>
-    /// Cache StpTool's unpacked tree (&lt;name&gt;.refunpack/) and its repack
-    /// (&lt;name&gt;.ref.repack) next to the sample.
-    /// </summary>
     private static bool GenerateReference(string sample, string refExe)
     {
         var bucket = Path.GetDirectoryName(sample)!;

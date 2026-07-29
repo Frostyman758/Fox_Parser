@@ -1,3 +1,4 @@
+// Hlsl tool regression gate
 using MgsvModBldr.Tools.Hlsl;
 using MgsvModBldr.Tools.Fsop;
 using MgsvModBldr.Tools.Testing;
@@ -6,14 +7,6 @@ using static MgsvModBldr.Tools.Testing.TestEnv;
 
 namespace MgsvModBldr.Tools.Hlsl.Tests;
 
-/// <summary>
-/// HLSL extractor gate. This tool is the sanctioned NON-byte-exact tool
-/// (shader recompile can't reproduce the original DXBC), so the gate is a
-/// validity smoke test, not a byte-exact round-trip: unpack a real fsop,
-/// and confirm EVERY .fxc yields non-empty, plausibly-valid preprocessed
-/// HLSL (has #line directives + actual shader code). Samples: the loose
-/// FxShaders fsop on Z:\ (or harvested fsop fixtures).
-/// </summary>
 public sealed class HlslTests : IToolTests
 {
     public string Name => "hlsl";

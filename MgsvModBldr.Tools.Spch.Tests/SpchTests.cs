@@ -1,3 +1,4 @@
+// Spch tool regression gate
 using System.Diagnostics;
 using MgsvModBldr.Tools.Spch;
 using MgsvModBldr.Tools.Testing;
@@ -6,15 +7,6 @@ using static MgsvModBldr.Tools.Testing.TestEnv;
 
 namespace MgsvModBldr.Tools.Spch.Tests;
 
-/// <summary>
-/// Spch (.spch speech table) gate — byte-exact parity with Atvaark's
-/// SpchTool (the reference): (A) my XML byte-matches SpchTool's XML, and
-/// (B) my repack byte-matches SpchTool's repack. SpchTool discards the
-/// per-label offset table on read (writes zeros), so it is lossy vs the
-/// game file -> the contract is reference-parity, like subp/lng/mtar.
-/// .spch live in FPKs; samples come from the mod-builder tmp
-/// (SPCH_SAMPLES_DIR). Oracle: SpchToolRef (SPCHREF).
-/// </summary>
 public sealed class SpchTests : IToolTests
 {
     public string Name => "spch";

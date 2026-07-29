@@ -1,3 +1,4 @@
+// Property container type enum
 namespace MgsvModBldr.Tools.Fox.Containers
 {
     public enum FoxContainerType

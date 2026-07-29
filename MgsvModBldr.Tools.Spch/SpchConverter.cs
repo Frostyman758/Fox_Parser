@@ -6,17 +6,6 @@ using System.Xml;
 
 namespace MgsvModBldr.Tools.Spch;
 
-/// <summary>
-/// Façade for the Fox Engine speech table (.spch) format. Mirrors
-/// Atvaark's SpchTool: StrCode32 (Core.CityHash64) + FNV1 hashes are
-/// resolved against the spch_* dictionaries shipped next to the exe; the
-/// XML is written with XmlWriter (UTF-8, indented). CLI:
-/// <c>.spch</c> -> <c>&lt;name&gt;.spch.xml</c>; <c>.spch.xml</c> -> <c>&lt;name&gt;.spch</c>.
-///
-/// SpchTool's side files (spch_hash_dump_dictionary.txt, appends to
-/// spch_user_dictionary.txt) are intentionally NOT produced — they don't
-/// affect the .spch/.xml output.
-/// </summary>
 public static class SpchConverter
 {
     private static readonly string[] StrCodeDicts =
@@ -59,7 +48,6 @@ public static class SpchConverter
         return new Dictionary<uint, string>(table);
     }
 
-    /// <summary>Decompile a .spch to <c>&lt;name&gt;.spch.xml</c>. Returns the xml path.</summary>
     public static string Unpack(string spchPath)
     {
         var hashManager = BuildHashManager();
@@ -75,7 +63,6 @@ public static class SpchConverter
         return outPath;
     }
 
-    /// <summary>Recompile a <c>&lt;name&gt;.spch.xml</c> back to <c>&lt;name&gt;.spch</c>. Returns the spch path.</summary>
     public static string Pack(string xmlPath)
     {
         var outPath = xmlPath.Substring(0, xmlPath.Length - ".xml".Length);

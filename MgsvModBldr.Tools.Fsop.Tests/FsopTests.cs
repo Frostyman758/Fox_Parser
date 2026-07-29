@@ -1,3 +1,4 @@
+// Fsop tool regression gate
 using MgsvModBldr.Tools.Fsop;
 using MgsvModBldr.Tools.Testing;
 using static MgsvModBldr.Tools.Testing.TestHelpers;
@@ -5,11 +6,6 @@ using static MgsvModBldr.Tools.Testing.TestEnv;
 
 namespace MgsvModBldr.Tools.Fsop.Tests;
 
-/// <summary>
-/// FSOP gate: byte-exact round-trip. The reference (Atvaark's Python
-/// Fsop_Tool) is deterministic, so unpack→pack must reproduce the
-/// original archive bit-for-bit.
-/// </summary>
 public sealed class FsopTests : IToolTests
 {
     public string Name => "fsop";
@@ -59,11 +55,6 @@ public sealed class FsopTests : IToolTests
         return hits;
     }
 
-    /// <summary>
-    /// FSOPs sit loose on disk under <c>Z:\shaders\**</c> — copy a
-    /// handful into the fixtures dir so the test runner has work to
-    /// do even if Z:\ is detached.
-    /// </summary>
     public void Harvest()
     {
         var dst = Path.Combine(FixturesDir, "fsop");

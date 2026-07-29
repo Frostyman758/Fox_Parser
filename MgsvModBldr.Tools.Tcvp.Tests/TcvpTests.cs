@@ -1,3 +1,4 @@
+// Tcvp tool regression gate
 using MgsvModBldr.Tools.Tcvp;
 using MgsvModBldr.Tools.Testing;
 using static MgsvModBldr.Tools.Testing.TestHelpers;
@@ -5,15 +6,6 @@ using static MgsvModBldr.Tools.Testing.TestEnv;
 
 namespace MgsvModBldr.Tools.Tcvp.Tests;
 
-/// <summary>
-/// Tcvp (.tcvp cover-point locators, GZ + TPP) gate: byte-exact round-trip
-/// vs the ORIGINAL game file. Our port fixes the reference TcvpTool's
-/// double-add bug, so unpack→repack reproduces the original exactly (the
-/// reference itself does NOT round-trip — it doubles the locators — so
-/// gating against it would be wrong; the game file is the ground truth).
-/// .tcvp live in FPKs; samples come from the mod-builder tmp
-/// (TCVP_SAMPLES_DIR).
-/// </summary>
 public sealed class TcvpTests : IToolTests
 {
     public string Name => "tcvp";

@@ -1,3 +1,4 @@
+// G0s tool regression gate
 using Microsoft.Win32.SafeHandles;
 using MgsvModBldr.Tools.G0s;
 using MgsvModBldr.Tools.Testing;
@@ -5,17 +6,6 @@ using static MgsvModBldr.Tools.Testing.TestHelpers;
 
 namespace MgsvModBldr.Tools.G0s.Tests;
 
-/// <summary>
-/// G0s (GZ QAR) gate. Two checks:
-///  (A) REAL data — sample the smallest entries of data_02.g0s, decrypt them
-///      and confirm they byte-match the reference unpacked dir GzsTool 0.2
-///      produced (validates the outer+inner decryption AND name resolution),
-///      then re-encrypt each and confirm it reproduces the original on-disk
-///      bytes (byte-exact round-trip, incl. the inner layer GzsTool 0.2 could
-///      not). Skipped if the GZ install isn't present.
-///  (B) SYNTHETIC — a small archive (with a forced inner-encrypted entry)
-///      packed and unpacked by us must round-trip byte-exact. Always runs.
-/// </summary>
 public sealed class G0sTests : IToolTests
 {
     public string Name => "g0s";

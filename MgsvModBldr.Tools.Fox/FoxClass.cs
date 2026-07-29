@@ -1,3 +1,4 @@
+// Fox class definition record
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;

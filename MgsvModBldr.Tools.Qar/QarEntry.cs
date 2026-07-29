@@ -106,12 +106,6 @@ public sealed class QarEntry
     public QarDataHeader  DataHeader { get; } = new();
     public byte[]         Data       { get; set; } = Array.Empty<byte>();
 
-    /// <summary>
-    /// True once <see cref="Data"/> holds this entry's authoritative content
-    /// (set by <see cref="ReadData"/> or by callers building entries in
-    /// memory). <see cref="QarFile.Write"/> only disk-loads when this is false,
-    /// so a legitimately empty 0-byte entry isn't mistaken for a lazy one.
-    /// </summary>
     public bool           Loaded     { get; set; }
 
     public void Read(Stream reader, uint version)

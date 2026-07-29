@@ -1,3 +1,4 @@
+// FtexTool CLI argument model
 using System;
 using System.Collections.Generic;
 using System.IO;

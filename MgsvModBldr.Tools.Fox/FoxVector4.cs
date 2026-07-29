@@ -1,3 +1,4 @@
+// Vector4 struct value
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;

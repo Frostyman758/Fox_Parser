@@ -1,10 +1,10 @@
+// .stp/.sab file model + IO
 using System.Buffers.Binary;
 
 namespace MgsvModBldr.Tools.Stp;
 
 public enum StpVersion { GZ = 0, TPP = 1 }
 
-/// <summary>One streamed package entry: a hash + its .wem RIFF and (TPP) .ls2 lipsync.</summary>
 public sealed class StpEntry
 {
     public uint Name { get; set; }
@@ -12,17 +12,6 @@ public sealed class StpEntry
     public byte[] Ls2 { get; set; } = Array.Empty<byte>(); // TPP only; may be empty
 }
 
-/// <summary>
-/// StreamedPackage (.stp): the streamed-audio container Fox Engine keeps
-/// inside an .sbp. Layout (little-endian, 'STPL'):
-///   uint32 'STPL' | uint16 count | byte version(0=GZ,1=TPP) | byte pad
-///   count × { uint32 nameHash | int32 wemOffset | [TPP] int32 ls2Offset }
-///   align 16
-///   data: GZ -> wem blocks; TPP -> per entry { ls2 then wem }.
-/// Block sizes are derived from offset deltas, so any inter-block padding
-/// is absorbed into the preceding block — rewriting the blocks verbatim in
-/// the original order reproduces the file byte-for-byte.
-/// </summary>
 public sealed class StreamedPackage
 {
     public const uint MagicLe = 0x4C505453; // 'STPL'
@@ -154,22 +143,12 @@ public sealed class StreamedPackage
     }
 }
 
-/// <summary>One streamed-animation entry: a 64-bit hash + its combined .lsst block.</summary>
 public sealed class SabEntry
 {
     public ulong Name { get; set; }
     public byte[] Lsst { get; set; } = Array.Empty<byte>();
 }
 
-/// <summary>
-/// StreamedAnimation (.sab): Layout (little-endian, 'SAL3'):
-///   uint32 'SAL3' | uint32 count
-///   count × { uint64 nameHash | int32 offset | uint32 pad(0) }
-///   data: per entry { lsst block; align 16 }
-/// As with .stp the block sizes come from offset deltas, so the trailing
-/// 16-align padding is absorbed into each block and a verbatim, in-order
-/// rewrite is byte-exact.
-/// </summary>
 public sealed class StreamedAnimation
 {
     public const uint MagicLe = 0x334C4153; // 'SAL3'

@@ -1,3 +1,4 @@
+// String literal table
 using System.Collections.Generic;
 
 namespace MgsvModBldr.Tools.Fox

@@ -1,3 +1,4 @@
+// hash/unhash commands, all engine hash variants
 using MgsvModBldr.Tools.GameHashing;
 using MgsvModBldr.Tools.Qar;
 
@@ -141,7 +142,6 @@ public static class FoxHashCmd
         return misses == 0 ? 0 : 1;
     }
 
-    /// <summary>Every *.txt in dict/ beside the exe (cwd fallback), plus -d extras.</summary>
     private static List<string> DictFiles(IEnumerable<string> extras)
     {
         var files = new List<string>();

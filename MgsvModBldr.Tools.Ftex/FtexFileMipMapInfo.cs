@@ -1,3 +1,4 @@
+// ftex mipmap directory record
 using System.IO;
 using System.Text;
 

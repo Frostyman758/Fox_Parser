@@ -1,6 +1,6 @@
-// Based on FvTwool/Fv2.cs (format lib only: Read + Write; the WinForms
-// UI, the lossy Fv2String edit path, and System.Windows.Forms are removed;
-// error handlers rethrow instead of MessageBox/swallow).
+// .fv2 format lib (Read + Write)
+// based on FvTwool/Fv2.cs; WinForms UI, lossy Fv2String edit path and
+// MessageBox/swallow handlers removed (rethrow instead).
 using System;
 using System.IO;
 using System.Xml.Serialization;

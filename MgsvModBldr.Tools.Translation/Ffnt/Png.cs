@@ -54,7 +54,6 @@ namespace MgsvModBldr.Tools.Translation.Ffnt
             WriteBE(s, Crc(crcBuf));
         }
 
-        /// <summary>Write an 8-bit grayscale PNG (color type 0, filter 0).</summary>
         public static void WriteGrayscale8(string path, int width, int height, byte[] pixels)
         {
             using var fs = File.Open(path, FileMode.Create, FileAccess.Write, FileShare.None);
@@ -85,12 +84,6 @@ namespace MgsvModBldr.Tools.Translation.Ffnt
             WriteChunk(fs, "IEND", Array.Empty<byte>());
         }
 
-        /// <summary>
-        /// Decode a PNG to a per-pixel "is pure white (255,255,255)" mask —
-        /// the only thing the .ffnt layer recombine needs. Supports 8-bit
-        /// color types 0 (gray), 2 (rgb), 3 (palette), 6 (rgba); filters
-        /// 0-4; non-interlaced.
-        /// </summary>
         public static (int width, int height, bool[] white) DecodeWhiteMask(string path)
         {
             var bytes = File.ReadAllBytes(path);

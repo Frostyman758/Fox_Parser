@@ -1,6 +1,6 @@
-// GZ (Ground Zeroes) Packed Fox Textures reader — SEPARATE from the TPP
-// PftxsFile so the proven TPP path is untouched. Ported from GzsTool 0.2
-// (Pftxs/PftxsFile.cs, PftxsFileEntry.cs, Psub/PsubFile.cs, PsubFileEntry.cs).
+// GZ pftxs reader (read-only)
+// Separate from the TPP PftxsFile so the proven TPP path is untouched.
+// Ported from GzsTool 0.2 (Pftxs/PftxsFile*, Psub/PsubFile*).
 //
 // GZ .pftxs has a different layout from TPP: a 20-byte PFTX header whose second
 // word is the float 1.0 (0x3F800000), then N entries of {nameOffset, ftexSize}

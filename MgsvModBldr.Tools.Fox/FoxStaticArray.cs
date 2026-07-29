@@ -1,3 +1,4 @@
+// StaticArray property container
 using MgsvModBldr.Tools.Fox.Types;
 
 namespace MgsvModBldr.Tools.Fox.Containers

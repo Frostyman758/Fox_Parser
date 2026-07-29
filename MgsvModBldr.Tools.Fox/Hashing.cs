@@ -1,3 +1,4 @@
+// FoxTool StrCode hashing
 using System;
 using MgsvModBldr.Core;
 

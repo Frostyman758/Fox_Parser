@@ -1,3 +1,4 @@
+// DXGI format enum
 namespace MgsvModBldr.Tools.Ftex.Dds.Enum
 {
     public enum DxgiFormat : uint

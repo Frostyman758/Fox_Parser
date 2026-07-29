@@ -3,15 +3,6 @@ using System.Xml.Serialization;
 
 namespace MgsvModBldr.Tools.Twpf;
 
-/// <summary>
-/// Façade for the Fox Engine weather-parameter (.twpf) format. Mirrors
-/// Atvaark's TwpfXmlTool exactly: the StringId dictionary is loaded from
-/// <c>twpf_stringId_dictionary.txt</c> next to the executable, and the
-/// XML is written via <see cref="XmlSerializer"/>.Serialize(Stream) (the
-/// same overload the original uses — indented, no encoding attribute).
-///
-/// CLI: <c>.twpf</c> -> <c>&lt;name&gt;.twpf.xml</c>; <c>.twpf.xml</c> -> <c>&lt;name&gt;.twpf</c>.
-/// </summary>
 public static class TwpfConverter
 {
     private const string DictName = "twpf_stringId_dictionary.txt";
@@ -22,7 +13,6 @@ public static class TwpfConverter
         set => TwpfLog.IsVerbose = value;
     }
 
-    /// <summary>Build hash→string lookup from the loose dictionary (if present).</summary>
     private static string ResolveDict(string name)
     {
         var inDict = Path.Combine(AppContext.BaseDirectory, "dict", name);
@@ -39,7 +29,6 @@ public static class TwpfConverter
         return dict;
     }
 
-    /// <summary>Decompile a .twpf to <c>&lt;name&gt;.twpf.xml</c>. Returns the xml path.</summary>
     public static string Unpack(string twpfPath, Dictionary<ulong, string> dict = null)
     {
         dict ??= LoadDictionary();
@@ -56,7 +45,6 @@ public static class TwpfConverter
         return outPath;
     }
 
-    /// <summary>Recompile a <c>&lt;name&gt;.twpf.xml</c> back to <c>&lt;name&gt;.twpf</c>. Returns the twpf path.</summary>
     public static string Pack(string xmlPath)
     {
         var outPath = xmlPath.Substring(0, xmlPath.Length - ".xml".Length);

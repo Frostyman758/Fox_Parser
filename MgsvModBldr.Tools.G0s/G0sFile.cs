@@ -1,9 +1,8 @@
+// .g0s archive reader/writer
 using System.Buffers.Binary;
 
 namespace MgsvModBldr.Tools.G0s;
 
-/// <summary>One .g0s entry. <see cref="Size"/> is the raw on-disk size (it
-/// includes the 8-byte inner header for inner-encrypted entries).</summary>
 public sealed class G0sEntry
 {
     public ulong Hash;
@@ -14,14 +13,6 @@ public sealed class G0sEntry
     public uint? InnerKey;       // set if inner-encrypted (preserved for byte-exact repack)
 }
 
-/// <summary>
-/// GZ QAR (.g0s) archive — footer-based (no header). Layout:
-///   [data blocks, 16-aligned] [entry table: N×16] [uint sizeSum] [align 16]
-///   [footer: count|0x71610000|entryBlockOffset|0|20]
-/// The last 4 bytes are the footer size (20); the 20-byte footer before it
-/// gives the entry count and the entry-table offset (×16). Each 16-byte
-/// entry is hash(8) | offset(4, ×16) | size(4). Ported from GzsTool 0.2.
-/// </summary>
 public sealed class G0sArchive
 {
     public const int FooterSize = 20;
@@ -30,7 +21,6 @@ public sealed class G0sArchive
     public string Name = "";
     public List<G0sEntry> Entries { get; } = new();
 
-    /// <summary>Read the footer + entry table (no data).</summary>
     public static G0sArchive ReadIndex(Stream input)
     {
         Span<byte> b4 = stackalloc byte[4];
@@ -61,11 +51,6 @@ public sealed class G0sArchive
         return arc;
     }
 
-    /// <summary>
-    /// Decrypt a raw entry blob (outer pass, then optional inner pass) into
-    /// the plaintext file bytes. Returns the inner key if the entry was
-    /// inner-encrypted (needed to re-encrypt it on repack).
-    /// </summary>
     public static (byte[] data, uint? innerKey) Decrypt(byte[] raw, uint offset)
     {
         G0sCrypto.DeEncryptQar(raw, offset); // in place, symmetric
@@ -79,11 +64,6 @@ public sealed class G0sArchive
         return (raw, null);
     }
 
-    /// <summary>
-    /// Re-encrypt plaintext into the raw on-disk blob: inner cipher (if a key
-    /// is set) wrapped with magic+key, then the outer pass for this offset.
-    /// This is the half GzsTool 0.2 stubbed out (its // TODO).
-    /// </summary>
     public static byte[] Encrypt(byte[] plaintext, uint offset, uint? innerKey)
     {
         byte[] blob;
@@ -103,7 +83,6 @@ public sealed class G0sArchive
         return blob;
     }
 
-    /// <summary>Cheaply test whether an entry is inner-encrypted from its first 8 raw bytes.</summary>
     public static bool PeekIsInner(byte[] first8, uint offset)
     {
         var b = (byte[])first8.Clone();
@@ -111,10 +90,8 @@ public sealed class G0sArchive
         return b.Length >= 4 && BinaryPrimitives.ReadUInt32LittleEndian(b) == G0sCrypto.InnerKeyMagic;
     }
 
-    /// <summary>On-disk blob size for a plaintext of the given length (+8 if inner-encrypted).</summary>
     public static long BlobSize(long plaintextLength, bool inner) => inner ? plaintextLength + 8 : plaintextLength;
 
-    /// <summary>Convert an entry FilePath ("/Fox/..foo.lua" or "deadbeef.lua") to an OS relative path.</summary>
     public static string OnDiskRelPath(string filePath)
     {
         var p = filePath.StartsWith("/") ? filePath.Substring(1) : filePath;

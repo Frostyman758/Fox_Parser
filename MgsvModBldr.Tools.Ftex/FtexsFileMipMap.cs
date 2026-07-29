@@ -1,3 +1,4 @@
+// ftexs mipmap block
 using System;
 using System.Collections.Generic;
 using System.IO;

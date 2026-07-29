@@ -1,3 +1,4 @@
+// DDS file reader/writer
 using System.IO;
 using System.Text;
 

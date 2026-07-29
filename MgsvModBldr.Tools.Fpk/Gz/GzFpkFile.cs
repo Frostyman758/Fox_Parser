@@ -1,7 +1,6 @@
-// GZ (Ground Zeroes) Fox Package reader — SEPARATE from the TPP FpkFile, so the
-// byte-exact TPP packer/reader and its tests are never affected. Read-only: the
-// shell-extension bridge uses this to browse/extract GZ fpk(d) found inside a
-// .g0s. Ported from GzsTool 0.2 (Fpk/FpkFile.cs).
+// GZ fpk reader (read-only)
+// Separate from the TPP FpkFile so the byte-exact TPP packer/reader and
+// its tests are never affected. Ported from GzsTool 0.2 (Fpk/FpkFile.cs).
 //
 // The body layout matches TPP (48-byte header, 48-byte entry records, 16-byte
 // references). The two differences that make GZ its own reader: the magic's
@@ -14,6 +13,8 @@ namespace MgsvModBldr.Tools.Fpk.Gz;
 public sealed class GzFpkFile
 {
     public const int HeaderSize = 48;
+
+    public bool IsFpkd { get; private set; }
 
     public List<GzFpkEntry> Entries { get; } = new();
 
@@ -32,6 +33,7 @@ public sealed class GzFpkFile
 
         if (!IsGzMagic(hdr))
             throw new InvalidDataException("not a GZ (ste) fpk");
+        f.IsFpkd = hdr[6] == (byte)'d';
 
         // hdr[36..40] = entry count, hdr[40..44] = reference count (skipped).
         uint entryCount = BinaryPrimitives.ReadUInt32LittleEndian(hdr.Slice(36, 4));

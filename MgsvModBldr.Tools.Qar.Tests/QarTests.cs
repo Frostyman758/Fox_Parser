@@ -1,3 +1,4 @@
+// Qar tool regression gate
 using System.Diagnostics;
 using MgsvModBldr.Tools.Qar;
 using MgsvModBldr.Tools.Testing;
@@ -6,13 +7,6 @@ using static MgsvModBldr.Tools.Testing.TestEnv;
 
 namespace MgsvModBldr.Tools.Qar.Tests;
 
-/// <summary>
-/// QAR (.dat) gate, two real checks:
-///   (A) EXTRACTION CORRECTNESS — every extracted file (name AND bytes)
-///       must byte-match cap's datfpk reference extraction.
-///   (B) PACK ROUND-TRIP — repack, re-extract, require byte-identical to
-///       the first extraction.
-/// </summary>
 public sealed class QarTests : IToolTests
 {
     public string Name => "qar";
@@ -74,7 +68,6 @@ public sealed class QarTests : IToolTests
         finally { TryDelete(work); }
     }
 
-    /// <summary>Locate a datfpk reference extraction for this .dat, if cached.</summary>
     private static string ReferenceDirFor(string dat)
     {
         var stem = Path.GetFileNameWithoutExtension(dat);
@@ -91,11 +84,6 @@ public sealed class QarTests : IToolTests
                         .ToList();
     }
 
-    /// <summary>
-    /// Z:\master1 has video <c>e2*.dat</c> blobs alongside the real game
-    /// archives. We harvest <c>data1.dat</c> only — smallest real QAR and
-    /// the one modders care about — plus its datfpk reference extraction.
-    /// </summary>
     public void Harvest()
     {
         var dst = Path.Combine(FixturesDir, "qar");

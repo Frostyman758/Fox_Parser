@@ -7,12 +7,6 @@ public sealed class QarDictionary
 {
     public const string DictionaryFileName = "qar_dictionary.txt";
 
-    /// <summary>
-    /// Resolve the external dictionary path. Shipped in the <c>dict/</c>
-    /// folder next to the running exe (loose, not embedded, so it can be
-    /// updated without recompiling); falls back to a loose copy beside the
-    /// exe and to the current directory for convenience.
-    /// </summary>
     public static string DefaultDictionaryPath() => ResolveDict(DictionaryFileName);
 
     internal static string ResolveDict(string fileName)
@@ -57,7 +51,6 @@ public sealed class QarDictionary
 
     private static Dictionary<uint, string>? _extMap;
 
-    /// <summary>Reverse-map a 13-bit extension code to its ".ext" (null if unknown).</summary>
     public static string? ExtensionFor(uint extCode)
     {
         if (_extMap is null)

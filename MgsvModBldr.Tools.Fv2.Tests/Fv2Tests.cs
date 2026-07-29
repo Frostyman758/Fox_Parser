@@ -1,3 +1,4 @@
+// Fv2 tool regression gate
 using MgsvModBldr.Tools.Fv2;
 using MgsvModBldr.Tools.Testing;
 using static MgsvModBldr.Tools.Testing.TestHelpers;
@@ -5,14 +6,6 @@ using static MgsvModBldr.Tools.Testing.TestEnv;
 
 namespace MgsvModBldr.Tools.Fv2.Tests;
 
-/// <summary>
-/// Fv2 (.fv2 fova variation) gate: byte-exact round-trip vs the ORIGINAL
-/// game file. FvTwool is WinForms with no CLI, and its named-hash export
-/// is lossy (drops the unknown indices); our format-lib port serialises
-/// the full Fv2 struct, so unpack→repack reproduces the original exactly.
-/// The game file is the ground truth (no reference oracle). .fv2 live in
-/// FPKs; samples come from the mod-builder tmp (FV2_SAMPLES_DIR).
-/// </summary>
 public sealed class Fv2Tests : IToolTests
 {
     public string Name => "fv2";

@@ -1,3 +1,4 @@
+// .g0s unpack/repack facade
 using System.Buffers.Binary;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -5,14 +6,6 @@ using Microsoft.Win32.SafeHandles;
 
 namespace MgsvModBldr.Tools.G0s;
 
-/// <summary>
-/// Unpack/repack for GZ QAR (.g0s). Unpack writes the decrypted plaintext
-/// files into <c>&lt;name&gt;/</c> (byte-identical to GzsTool 0.2's output)
-/// plus a JSON manifest; repack rebuilds a byte-exact .g0s — including
-/// re-encrypting the inner-encrypted entries (which GzsTool 0.2 left as a
-/// TODO and could not round-trip). The inner key + entry hash are preserved
-/// in the manifest. I/O is parallel via positional reads/writes.
-/// </summary>
 public static class G0sPacker
 {
     private static readonly JsonSerializerOptions JsonOpts = new()

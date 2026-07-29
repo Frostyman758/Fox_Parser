@@ -1,3 +1,4 @@
+// ftex unknown flag bits
 using System;
 
 namespace MgsvModBldr.Tools.Ftex.Ftex.Enum

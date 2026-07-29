@@ -1,3 +1,4 @@
+// Fox tool regression gate
 using System.Diagnostics;
 using MgsvModBldr.Tools.Fox;
 using MgsvModBldr.Tools.Testing;
@@ -6,13 +7,6 @@ using static MgsvModBldr.Tools.Testing.TestEnv;
 
 namespace MgsvModBldr.Tools.Fox.Tests;
 
-/// <summary>
-/// Fox gate: Atvaark-equivalent (lossy reference). Checks recompile
-/// SIZE matches the original and the XML is STABLE across a second
-/// round-trip (Atvaark reconstructs the string-literal table, so a
-/// byte-exact round-trip is impossible — matching his behaviour is the
-/// porting contract).
-/// </summary>
 public sealed class FoxTests : IToolTests
 {
     public string Name => "fox";
@@ -33,11 +27,6 @@ public sealed class FoxTests : IToolTests
         return RunParallel(samples, TryRoundtrip);
     }
 
-    /// <summary>
-    /// Fox verification: decompile → recompile → decompile → check
-    /// (a) recompile output is the same SIZE as the original and
-    /// (b) the XML is STABLE across the second round-trip.
-    /// </summary>
     private static (bool ok, string note) TryRoundtrip(string fox)
     {
         var work = MakeTmp("fox_rt_");
@@ -88,13 +77,6 @@ public sealed class FoxTests : IToolTests
             .ToList();
     }
 
-    /// <summary>
-    /// Whole-XML comparison with one known noise field masked out: the
-    /// <c>originalVersion</c> attribute on the <c>&lt;fox&gt;</c> root,
-    /// which Atvaark's FoxFile constructor initialises to
-    /// <see cref="DateTime.Now"/> rather than reading from the binary.
-    /// Any other difference still fails.
-    /// </summary>
     private static bool XmlEqualIgnoringTimestamp(string aPath, string bPath)
     {
         var a = System.Text.RegularExpressions.Regex.Replace(
@@ -104,12 +86,6 @@ public sealed class FoxTests : IToolTests
         return a == b;
     }
 
-    /// <summary>
-    /// Fox samples live INSIDE FPK/FPKD archives, so we need datfpk to
-    /// extract them. Walks a wide slice of Z:\tpp\release\pack and
-    /// harvests up to MaxFoxSamplesPerExt samples of every supported
-    /// extension.
-    /// </summary>
     public void Harvest()
     {
         var dst = Path.Combine(FixturesDir, "fox");

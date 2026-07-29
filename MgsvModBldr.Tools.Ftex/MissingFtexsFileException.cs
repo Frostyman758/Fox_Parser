@@ -1,3 +1,4 @@
+// Missing sidecar exception
 using System;
 
 namespace MgsvModBldr.Tools.Ftex.Exceptions

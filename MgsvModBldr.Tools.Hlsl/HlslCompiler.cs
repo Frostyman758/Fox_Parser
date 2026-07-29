@@ -1,16 +1,9 @@
+// HLSL -> DXBC via D3DCompile
 using System.Runtime.InteropServices;
 using System.Text;
 
 namespace MgsvModBldr.Tools.Hlsl;
 
-/// <summary>
-/// HLSL -> DXBC compiler backed by D3DCompile (d3dcompiler_47.dll — the
-/// same engine fxc.exe uses, so the output is standard SM5 DXBC that MGSV
-/// loads). Windows only; on other platforms it throws a clear message
-/// (the decompile/extract side stays cross-platform). The result is
-/// functional, NOT byte-identical to Konami's original .fxc — the
-/// sanctioned exception to the toolset's byte-exact rule.
-/// </summary>
 public static class HlslCompiler
 {
     public static bool IsAvailable => OperatingSystem.IsWindows();
@@ -29,11 +22,6 @@ public static class HlslCompiler
         uint Flags1, uint Flags2,
         out IntPtr ppCode, out IntPtr ppErrorMsgs);
 
-    /// <summary>
-    /// Compile preprocessed HLSL bytes to a DXBC (.fxc) blob. Throws on
-    /// failure (with the compiler error text). Source bytes are passed
-    /// as-is so Shift-JIS comments are tolerated (lexer skips // to EOL).
-    /// </summary>
     public static byte[] Compile(byte[] source, string sourceName, string entryPoint, string target, uint flags)
     {
         if (!IsAvailable)

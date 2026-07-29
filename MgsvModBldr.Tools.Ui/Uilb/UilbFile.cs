@@ -2,10 +2,6 @@
 // 09/07/2026
 namespace MgsvModBldr.Tools.Ui.Uilb;
 
-/// <summary>
-/// Parsed .uilb. Entry tables are raw bytes (layouts identical GZ/TPP);
-/// only id/path tables differ per version (see FORMATS.md).
-/// </summary>
 public sealed class UilbFile
 {
     public const int ModelStride = 0x64, AnimStride = 0x14, CameraStride = 0x34, GraphStride = 0x50;

@@ -1,3 +1,4 @@
+// Enum name/value pair
 namespace MgsvModBldr.Tools.Fox.Enums
 {
     public class FoxEnumValue

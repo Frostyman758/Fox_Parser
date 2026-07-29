@@ -1,14 +1,9 @@
+// .sbp unpack/pack facade
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace MgsvModBldr.Tools.Sbp;
 
-/// <summary>
-/// Unpack/pack for .sbp sound-bank packages. Unpack writes a small JSON
-/// manifest (<c>&lt;name&gt;.sbp.json</c>) plus the extracted sub-files into
-/// <c>&lt;name&gt;_sbp/</c>; pack reads the manifest + folder back into a
-/// byte-exact .sbp. Sub-file extraction is parallel.
-/// </summary>
 public static class SbpPacker
 {
     private static readonly JsonSerializerOptions JsonOpts = new()

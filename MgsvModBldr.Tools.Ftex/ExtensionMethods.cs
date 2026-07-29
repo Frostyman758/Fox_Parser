@@ -1,3 +1,4 @@
+// Stream alignment helper extensions
 using System;
 using System.IO;
 using System.Runtime.InteropServices;

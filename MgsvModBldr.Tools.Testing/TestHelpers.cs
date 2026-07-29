@@ -1,22 +1,11 @@
+// Shared test utilities
 using System.Diagnostics;
 using System.Security.Cryptography;
 
 namespace MgsvModBldr.Tools.Testing;
 
-/// <summary>
-/// Generic, tool-agnostic test utilities: per-file parallel gate
-/// running with stable output order, byte/content tree comparison, temp
-/// dirs, hashing and size formatting. Tool-specific gates live in each
-/// tool's .Tests project and call into these.
-/// </summary>
 public static class TestHelpers
 {
-    /// <summary>
-    /// Per-file gate runner. Each case is independent (its own scratch
-    /// dir, no shared state) so Parallel.For is safe. Results are
-    /// collected into a position-indexed array so the printed output is
-    /// in stable input order, not completion order — diff-friendly logs.
-    /// </summary>
     public static (int pass, int fail) RunParallel(
         List<string> samples,
         Func<string, (bool ok, string note)> gate)
@@ -84,11 +73,6 @@ public static class TestHelpers
         return $"{n} B";
     }
 
-    /// <summary>
-    /// Recursively byte-compare two extracted trees. Returns
-    /// (matched, differing, missingInB). Files present only in B are
-    /// ignored (both tools should produce the same set).
-    /// </summary>
     public static (int matched, int differing, int missingInB) ByteCompareTrees(string a, string b)
     {
         int matched = 0, differing = 0, missing = 0;
@@ -102,12 +86,6 @@ public static class TestHelpers
         return (matched, differing, missing);
     }
 
-    /// <summary>
-    /// Compare two trees by file-content multiset (SHA256), ignoring
-    /// names/paths. Returns (sharedCount, onlyInA, onlyInB). Used where
-    /// two tools extract identical bytes but name unresolved entries
-    /// differently.
-    /// </summary>
     public static (int shared, int onlyA, int onlyB) ContentSetCompare(string a, string b)
     {
         static Dictionary<string, int> Hashes(string root)

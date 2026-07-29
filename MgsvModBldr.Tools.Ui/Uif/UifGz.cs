@@ -12,7 +12,6 @@ public sealed class GzUifNode
     public uint DataOff;
 }
 
-/// <summary>Parsed GZ .uif: header, nodes, StrCode64 table, path strings.</summary>
 public sealed class GzUif
 {
     public ushort Flags;

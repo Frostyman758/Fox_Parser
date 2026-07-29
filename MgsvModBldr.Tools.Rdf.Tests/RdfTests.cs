@@ -1,3 +1,4 @@
+// Rdf tool regression gate
 using System.Diagnostics;
 using MgsvModBldr.Tools.Rdf;
 using MgsvModBldr.Tools.Testing;
@@ -6,16 +7,6 @@ using static MgsvModBldr.Tools.Testing.TestEnv;
 
 namespace MgsvModBldr.Tools.Rdf.Tests;
 
-/// <summary>
-/// Rdf (.rdf radio dialogue, GZ v1 + TPP v3) gate — byte-exact parity
-/// with Atvaark's RdfTool: (A) my XML byte-matches RdfTool's XML, and
-/// (B) my repack byte-matches RdfTool's repack. RdfTool rebuilds the
-/// binary from the parsed structure (re-derives the dialogueEvent/chara
-/// index tables, offset tables), so it can be lossy vs the game file ->
-/// gate is reference-parity, like spch/subp. .rdf live in FPKs; samples
-/// come from the mod-builder tmp (RDF_SAMPLES_DIR). Oracle: RdfToolRef
-/// (RDFREF).
-/// </summary>
 public sealed class RdfTests : IToolTests
 {
     public string Name => "rdf";

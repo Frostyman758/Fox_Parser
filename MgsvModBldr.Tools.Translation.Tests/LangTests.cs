@@ -1,3 +1,4 @@
+// Lang tool regression gate
 using System.Diagnostics;
 using System.IO.Compression;
 using MgsvModBldr.Tools.Translation;
@@ -7,18 +8,6 @@ using static MgsvModBldr.Tools.Testing.TestEnv;
 
 namespace MgsvModBldr.Tools.Translation.Tests;
 
-/// <summary>
-/// Lang (.lng/.lng2) gate — byte-exact parity with Atvaark's LangTool
-/// (the reference), on BOTH directions:
-///   (A) my XML byte-matches LangTool's XML (cached <c>&lt;name&gt;.lng.ref.xml</c>).
-///   (B) my repack byte-matches LangTool's repack (cached <c>&lt;name&gt;.lng.ref.repack</c>).
-/// Like subp, LangTool is lossy vs the game file (it always pads on
-/// align and normalises the version), so the contract is reference-parity.
-///
-/// .lng files are not loose on Z:\ (they live in archives); supply
-/// samples via the LNG_SAMPLES_ZIP env (a zip of .lng/.lng2 files) and
-/// re-harvest. Reference oracle: LangToolRef (env LNGREF).
-/// </summary>
 public sealed class LangTests : IToolTests
 {
     public string Name => "lng";
@@ -97,10 +86,6 @@ public sealed class LangTests : IToolTests
     private const string DefaultSamplesDir = @"C:\Users\Blue\Downloads\test\tmp";
     private const int MaxPerExt = 8;
 
-    /// <summary>
-    /// Harvest a diverse spread of .lng + .lng2 into hash-keyed buckets,
-    /// caching the LangTool reference XML + repack for each.
-    /// </summary>
     public void Harvest()
     {
         var dst = Path.Combine(FixturesDir, "lng");

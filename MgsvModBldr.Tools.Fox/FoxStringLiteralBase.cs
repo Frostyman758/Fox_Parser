@@ -1,3 +1,4 @@
+// String literal base record
 using System.IO;
 using System.Text;
 

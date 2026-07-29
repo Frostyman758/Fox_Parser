@@ -5,12 +5,6 @@ using MgsvModBldr.Tools.GameHashing;
 
 namespace MgsvModBldr.Tools.Ui.Uif;
 
-/// <summary>
-/// Re-serializes a GZ uif as TPP 0x202: common info 0x50→0x4C (drops the GZ
-/// float priority), direct vertex buffers → shared pools + identity remaps,
-/// vertex controls inlined 8→24 B, StrCode64→StrCode32, paths→PathCode64,
-/// technique table mined from corpus constants. See FORMATS.md.
-/// </summary>
 public static class UifConvert
 {
     // technique str32 -> constant param (whole TPP corpus, stable per technique)
@@ -145,7 +139,6 @@ public static class UifConvert
         return m;
     }
 
-    /// <summary>GZ "/as/&lt;ciphered&gt;" texture ref → real path (PS3-twin mined tsv). Returns (path, wasAsRef).</summary>
     public static (string path, bool wasAs) ResolveTexPath(string p)
     {
         if (!p.StartsWith("/as/", StringComparison.Ordinal)) return (p, false);

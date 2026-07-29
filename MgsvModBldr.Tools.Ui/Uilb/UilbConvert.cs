@@ -6,7 +6,6 @@ namespace MgsvModBldr.Tools.Ui.Uilb;
 
 public static class UilbConvert
 {
-    /// <summary>StrCode64→low32 truncation (== StrCode32); paths→PathCode64; rest byte-copied.</summary>
     public static UilbFile GzToTpp(UilbFile gz)
     {
         if (gz.IsTpp) throw new ArgumentException("already TPP");

@@ -6,10 +6,6 @@ using MgsvModBldr.Tools.Ui.Uilb;
 
 namespace MgsvModBldr.Tools.Cli;
 
-/// <summary>
-/// `modbldr-tools gzui &lt;file|folder&gt; [-o out]` — GZ→TPP UI conversion.
-/// uilb converts; uia copies (format identical); uigb/uif pending.
-/// </summary>
 public static class GzUiCmd
 {
     public static int Run(string[] args)

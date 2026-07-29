@@ -1,6 +1,6 @@
-// GZ (Ground Zeroes) fpk path string — SEPARATE from the TPP FpkString so the
-// proven TPP path is never touched. Ported from GzsTool 0.2 (Fpk/FpkString.cs +
-// Utility/Hashing.cs ResolveString / TryGetFileNameFromMd5Hash).
+// GZ fpk path string resolver
+// Separate from the TPP FpkString so the proven TPP path is untouched.
+// Ported from GzsTool 0.2 (Fpk/FpkString.cs + Utility/Hashing.cs).
 //
 // In a GZ fpk the stored string is usually an opaque placeholder, not the path.
 // Resolution: if the raw bytes' MD5 equals the entry's stored hash, the raw

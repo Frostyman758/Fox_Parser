@@ -1,3 +1,4 @@
+// Mtar tool regression gate
 using System.Diagnostics;
 using MgsvModBldr.Tools.Mtar;
 using MgsvModBldr.Tools.Testing;
@@ -6,17 +7,6 @@ using static MgsvModBldr.Tools.Testing.TestEnv;
 
 namespace MgsvModBldr.Tools.Mtar.Tests;
 
-/// <summary>
-/// Mtar (.mtar motion archive, v1 + v2) gate — byte-exact parity with
-/// Atvaark's MtarTool (the reference), on BOTH directions:
-///   (A) my XML byte-matches MtarTool's XML (cached <c>&lt;name&gt;.mtar.ref.xml</c>).
-///   (B) my repack byte-matches MtarTool's repack (cached <c>&lt;name&gt;.mtar.ref.repack</c>).
-/// MtarTool is lossy vs the game file (it recomputes entry hashes from
-/// names and re-sorts), so the contract is reference-parity, not
-/// game-file parity (same as subp/lng/fox). .mtar live in FPK/FPKDs;
-/// samples come from the mod-builder tmp (MTAR_SAMPLES_DIR). Harvest
-/// covers both v1 and v2 across a size range. Oracle: MtarToolRef (MTARREF).
-/// </summary>
 public sealed class MtarTests : IToolTests
 {
     public string Name => "mtar";
@@ -84,11 +74,6 @@ public sealed class MtarTests : IToolTests
                         .ToList();
     }
 
-    /// <summary>
-    /// Harvest a v1+v2 spread of .mtar from MTAR_SAMPLES_DIR (default the
-    /// mod-builder tmp) into hash-keyed buckets, caching the MtarTool
-    /// reference XML + repack for each.
-    /// </summary>
     public void Harvest()
     {
         var dst = Path.Combine(FixturesDir, "mtar");
@@ -137,11 +122,6 @@ public sealed class MtarTests : IToolTests
         try { return MtarConverter.GetMtarType(path); } catch { return 0; }
     }
 
-    /// <summary>
-    /// Run MtarToolRef in a temp dir (unpack then repack) and cache
-    /// <c>&lt;name&gt;.mtar.ref.xml</c> + <c>&lt;name&gt;.mtar.ref.repack</c> next to
-    /// the sample. Locate via MTARREF env or the default build path.
-    /// </summary>
     private static void GenerateReference(string stagedMtar)
     {
         var refDll = Environment.GetEnvironmentVariable("MTARREF");

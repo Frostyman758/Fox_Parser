@@ -1,3 +1,4 @@
+// Pftxs tool regression gate
 using System.Diagnostics;
 using MgsvModBldr.Tools.Pftxs;
 using MgsvModBldr.Tools.Testing;
@@ -6,12 +7,6 @@ using static MgsvModBldr.Tools.Testing.TestEnv;
 
 namespace MgsvModBldr.Tools.Pftxs.Tests;
 
-/// <summary>
-/// PFTXS gate: (A) extraction content-matches the cached reference
-/// (compared by content multiset, since PFTXS is a pure byte-range
-/// container and only unresolved-entry NAMING can differ), (B) pack
-/// round-trip byte-identical.
-/// </summary>
 public sealed class PftxsTests : IToolTests
 {
     public string Name => "pftxs";

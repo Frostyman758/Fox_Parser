@@ -1,3 +1,4 @@
+// Stream/reader helper extensions
 using System;
 using System.Globalization;
 using System.IO;

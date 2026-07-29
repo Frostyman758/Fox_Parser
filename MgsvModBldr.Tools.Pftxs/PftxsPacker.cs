@@ -7,7 +7,7 @@ namespace MgsvModBldr.Tools.Pftxs;
 
 public static class PftxsPacker
 {
-    private static readonly JsonSerializerOptions JsonOpts = new()
+    internal static readonly JsonSerializerOptions JsonOpts = new()
     {
         WriteIndented = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
@@ -16,6 +16,12 @@ public static class PftxsPacker
 
     public static string Unpack(string pftxsPath, string? outDir = null, string? dictPath = null)
     {
+        // GZ layout (PFTX + float 1.0) routes to the read-only GZ unpacker.
+        Span<byte> head = stackalloc byte[8];
+        using (var sniff = File.OpenRead(pftxsPath))
+            if (sniff.Read(head) == head.Length && Gz.GzPftxsFile.IsGzPftxs(head))
+                return Gz.GzPftxsUnpacker.Unpack(pftxsPath, outDir);
+
         var dict = QarDictionary.Load(dictPath);
         outDir ??= DefaultUnpackDir(pftxsPath);
         Directory.CreateDirectory(outDir);
@@ -57,6 +63,9 @@ public static class PftxsPacker
     {
         var manifest = JsonSerializer.Deserialize<PftxsManifest>(File.ReadAllText(manifestPath), JsonOpts)
                        ?? throw new InvalidDataException("PFTXS manifest deserialise failed.");
+
+        if (manifest.Type.StartsWith("gz", StringComparison.OrdinalIgnoreCase))
+            throw new InvalidDataException("GZ pftxs is read-only — packing GZ archives is not supported.");
         outFile ??= StripJson(manifestPath);
         var baseDir = ContentDirFor(manifestPath);
 
@@ -84,7 +93,7 @@ public static class PftxsPacker
         return outFile;
     }
 
-    private static string DefaultUnpackDir(string p)
+    internal static string DefaultUnpackDir(string p)
     {
         var stem = Path.GetFileNameWithoutExtension(p);
         var dir  = Path.GetDirectoryName(p) ?? ".";

@@ -6,10 +6,6 @@ using MgsvModBldr.Tools.Ui.Uif;
 
 namespace MgsvModBldr.Tools.Ui.Tests;
 
-/// <summary>
-/// Parses converter output with the TPP formulas (shared pools + remap
-/// tables) and checks geometry, ids and texture refs match the GZ source.
-/// </summary>
 public static class UifGate
 {
     static ushort U16(byte[] d, int o) => BinaryPrimitives.ReadUInt16LittleEndian(d.AsSpan(o, 2));

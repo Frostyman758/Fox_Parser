@@ -6,14 +6,6 @@ using System.Xml;
 
 namespace MgsvModBldr.Tools.Rdf;
 
-/// <summary>
-/// Façade for the Fox Engine radio dialogue (.rdf) format (GZ v1 + TPP
-/// v3, auto-detected from the version byte). Mirrors Atvaark's RdfTool:
-/// StrCode32 (Core.CityHash64) + FNV1 hashes resolved against the rdf_*
-/// dictionaries next to the exe; XML via XmlWriter (UTF-8, indented).
-/// CLI: <c>.rdf</c> -> <c>&lt;name&gt;.rdf.xml</c>; <c>.rdf.xml</c> -> <c>&lt;name&gt;.rdf</c>.
-/// The RdfTool side files (hash dump, user dictionary) are not produced.
-/// </summary>
 public static class RdfConverter
 {
     private static readonly string[] StrCodeDicts =
@@ -53,7 +45,6 @@ public static class RdfConverter
         return new Dictionary<uint, string>(table);
     }
 
-    /// <summary>Decompile a .rdf to <c>&lt;name&gt;.rdf.xml</c>. Returns the xml path.</summary>
     public static string Unpack(string rdfPath)
     {
         var hm = BuildHashManager();
@@ -80,7 +71,6 @@ public static class RdfConverter
         return outPath;
     }
 
-    /// <summary>Recompile a <c>&lt;name&gt;.rdf.xml</c> back to <c>&lt;name&gt;.rdf</c>. Returns the rdf path.</summary>
     public static string Pack(string xmlPath)
     {
         var outPath = xmlPath.Substring(0, xmlPath.Length - ".xml".Length);

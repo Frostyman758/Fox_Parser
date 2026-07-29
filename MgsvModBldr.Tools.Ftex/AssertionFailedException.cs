@@ -1,3 +1,4 @@
+// Ftex assertion exception
 using System;
 
 namespace MgsvModBldr.Tools.Ftex.Exceptions

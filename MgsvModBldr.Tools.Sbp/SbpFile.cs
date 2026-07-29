@@ -1,35 +1,19 @@
+// .sbp file model + IO
 using System.Buffers.Binary;
 using System.Text;
 
 namespace MgsvModBldr.Tools.Sbp;
 
-/// <summary>
-/// One sub-file inside an .sbp. <see cref="Magic"/> is the trimmed 4-byte
-/// tag ("bnk", "stp", "sab"); <see cref="Offset"/>/<see cref="Size"/> are
-/// recomputed on write so only the magic + payload matter for round-trip.
-/// </summary>
 public sealed class SbpEntry
 {
     public const int HeaderSize = 12;
 
-    /// <summary>4-byte file tag, trailing NULs trimmed (e.g. "bnk").</summary>
     public string Magic { get; set; } = "";
     public uint Offset { get; set; }
     public int Size { get; set; }
     public byte[] Data { get; set; } = Array.Empty<byte>();
 }
 
-/// <summary>
-/// Sound Bank Package (.sbp) container. Format (little-endian):
-///   uint32 'SBPL' | byte fileCount | uint16 headerSize | byte padding(0)
-///   fileCount × { char[4] magic | uint32 offset | int32 size }
-///   data blocks, each on a 16-byte boundary (0x00 padding).
-/// headerSize == 8 + fileCount*12. Lossless: unpack→repack is byte-exact.
-///
-/// Functionally identical to GzsTool's Sbp handling, but the raw 4-byte
-/// magic is preserved (GzsTool re-derives it from the file extension);
-/// preserving it keeps the round-trip exact regardless of the tag.
-/// </summary>
 public sealed class SbpFile
 {
     public const uint MagicLe = 0x4C504253; // 'SBPL'
