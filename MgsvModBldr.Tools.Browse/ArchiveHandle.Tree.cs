@@ -1,7 +1,5 @@
 // Tree construction per archive format
 using MgsvModBldr.Tools.Qar;
-using MgsvModBldr.Tools.Fpk.Gz;
-using MgsvModBldr.Tools.Pftxs.Gz;
 using MgsvModBldr.Tools.G0s;
 
 namespace MgsvModBldr.Tools.Browse;
@@ -46,24 +44,24 @@ public sealed partial class ArchiveHandle
         }
     }
 
-    private void BuildGzFpkTree(GzFpkFile fpk)
+    private void BuildGzFpkTree(List<LazyGzFpkReader.Entry> entries)
     {
         // Entry paths are MD5-resolved (real path from fpk_dictionary, else
-        // <md5hex><ext>); see GzFpkString. Data is plaintext, already in memory.
-        foreach (var e in fpk.Entries)
+        // <md5hex><ext>); see GzFpkString. Data is plaintext, pulled on demand.
+        foreach (var e in entries)
         {
-            var leaf = AddPath(e.FilePath, (ulong)e.Data.LongLength, 0);
-            leaf.GzFpk = e;
+            var leaf = AddPath(e.Path, (ulong)e.DataSize, 0);
+            leaf.Lazy = new LazyBlob { Offset = e.DataOffset, Length = e.DataSize, Decode = LazyBlob.Raw };
             leaf.IsArchive = FoxFormats.IsGzNestedContainer(leaf.Name);
         }
     }
 
-    private void BuildGzPftxsTree(GzPftxsFile pftxs)
+    private void BuildGzPftxsTree(List<LazyGzPftxsReader.Entry> entries)
     {
-        foreach (var e in pftxs.Files)   // flat .ftex + .ftexs entries
+        foreach (var e in entries)       // flat .ftex + .ftexs entries, pulled on demand
         {
-            var leaf = AddPath(e.Path, (ulong)e.Data.LongLength, 0);
-            leaf.GzPftxs = e;
+            var leaf = AddPath(e.Path, (ulong)e.Size, 0);
+            leaf.Lazy = new LazyBlob { Offset = e.Offset, Length = e.Size, Decode = LazyBlob.Raw };
         }
     }
 

@@ -1,7 +1,5 @@
 // Browse tree nodes: dirs, files, lazy regions
 using MgsvModBldr.Tools.Qar;
-using MgsvModBldr.Tools.Fpk.Gz;
-using MgsvModBldr.Tools.Pftxs.Gz;
 using MgsvModBldr.Tools.G0s;
 
 namespace MgsvModBldr.Tools.Browse;
@@ -24,11 +22,9 @@ public sealed class FileNode
     public bool   IsArchive;     // a nested container we can drill into
 
     // Set per owning-archive kind for the formats still read eagerly (QAR + G0s
-    // decrypt per entry; the GZ readers are nested-only). Lazy formats use Lazy
-    // instead; fpk/pftxs/sbp/stp/sab/fsop/mtar are all lazy.
+    // decrypt per entry). Everything else — fpk/pftxs (TPP and GZ)/sbp/stp/sab/
+    // fsop/mtar — uses Lazy instead.
     public QarEntry?     Qar;
-    public GzFpkEntry?   GzFpk;
-    public GzPftxsEntry? GzPftxs;
     public G0sEntry?     G0s;
 
     // Resolved-in-memory bytes for entries that are plain blobs (mtar .enchnk).

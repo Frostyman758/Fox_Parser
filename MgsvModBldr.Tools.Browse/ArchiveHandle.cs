@@ -145,11 +145,10 @@ public sealed partial class ArchiveHandle : IDisposable
 
     private static ArchiveHandle OpenGzFpk(string? path, byte[]? bytes)
     {
-        GzFpkFile fpk;
-        if (path is not null) { using var fs = File.OpenRead(path); fpk = GzFpkFile.Read(fs); }
-        else { using var ms = new MemoryStream(bytes!, writable: false); fpk = GzFpkFile.Read(ms); }
+        // LAZY: names resolve from the string heap + MD5; entry bytes stay in
+        // the source (GZ fpk data is plaintext — no crypto).
         var h = new ArchiveHandle(Kind.GzFpk, path, bytes, null);
-        h.BuildGzFpkTree(fpk);
+        using (var s = h.OpenSource()) h.BuildGzFpkTree(LazyGzFpkReader.Read(s));
         return h;
     }
 
@@ -169,11 +168,9 @@ public sealed partial class ArchiveHandle : IDisposable
 
     private static ArchiveHandle OpenGzPftxs(string? path, byte[]? bytes)
     {
-        GzPftxsFile pftxs;
-        if (path is not null) { using var fs = File.OpenRead(path); pftxs = GzPftxsFile.Read(fs); }
-        else { using var ms = new MemoryStream(bytes!, writable: false); pftxs = GzPftxsFile.Read(ms); }
+        // LAZY: walk the PFTX/PSUB index only; texture bytes pulled on demand.
         var h = new ArchiveHandle(Kind.GzPftxs, path, bytes, null);
-        h.BuildGzPftxsTree(pftxs);
+        using (var s = h.OpenSource()) h.BuildGzPftxsTree(LazyGzPftxsReader.Read(s));
         return h;
     }
 
@@ -275,13 +272,6 @@ public sealed partial class ArchiveHandle : IDisposable
 
         if (node.Blob is { } blob)       // resolved-in-memory (mtar .enchnk; rare)
             return blob;
-
-        // GZ fpk/pftxs are nested-only (always opened from an already-in-memory
-        // g0s blob), so their bytes are decoded up front — lazy would save nothing.
-        if (_kind == Kind.GzFpk)
-            return node.GzFpk!.Data;
-        if (_kind == Kind.GzPftxs)
-            return node.GzPftxs!.Data;
 
         if (_kind == Kind.G0s)           // GZ QAR: read raw blob, then decrypt
         {

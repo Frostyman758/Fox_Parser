@@ -21,7 +21,7 @@ internal static class LazyGzFpkReader
     public static List<Entry> Read(Stream r)
     {
         Span<byte> hdr = stackalloc byte[GzFpkFile.HeaderSize];
-        GzFpkString.ReadExact(r, hdr);
+        ReadExact(r,hdr);
         if (!GzFpkFile.IsGzMagic(hdr))
             throw new InvalidDataException("not a GZ (ste) fpk");
         uint entryCount = BinaryPrimitives.ReadUInt32LittleEndian(hdr.Slice(36, 4));
@@ -33,13 +33,13 @@ internal static class LazyGzFpkReader
         Span<byte> md5 = stackalloc byte[16];
         for (int i = 0; i < entryCount; i++)
         {
-            GzFpkString.ReadExact(r, info);
+            ReadExact(r,info);
             uint dataOffset = BinaryPrimitives.ReadUInt32LittleEndian(info.Slice(0, 4));
             int  dataSize   = BinaryPrimitives.ReadInt32LittleEndian(info.Slice(8, 4));
 
             var name = new GzFpkString();
             name.Read(r);
-            GzFpkString.ReadExact(r, md5);
+            ReadExact(r,md5);
             name.Resolve(md5.ToArray());
 
             list.Add(new Entry
@@ -50,5 +50,11 @@ internal static class LazyGzFpkReader
             });
         }
         return list;
+    }
+
+    private static void ReadExact(Stream s, Span<byte> buf)
+    {
+        int n = 0;
+        while (n < buf.Length) { int r = s.Read(buf[n..]); if (r == 0) throw new EndOfStreamException(); n += r; }
     }
 }

@@ -26,20 +26,33 @@ public sealed class QarDictionary
     private static QarDictionary? _cached;
     private static string? _cachedPath;
 
-    private readonly Dictionary<ulong, string> _baseByHash;     // base-hash -> base path
-    private readonly Dictionary<uint, string>  _extByCode;       // ext-code  -> ".ext"
-
-    private QarDictionary(Dictionary<ulong, string> baseByHash, Dictionary<uint, string> extByCode)
+    // Release the process-wide cached table (idle memory reclaim). The next
+    // Load() re-parses from disk.
+    public static void DropCache()
     {
+        lock (Lock) { _cached = null; _cachedPath = null; }
+    }
+
+    // Lines live as ONE UTF-8 blob + hash -> (offset<<24 | length) index — about
+    // half the resident cost of a per-line string table (~600k paths). Only a
+    // resolve HIT materialises a string.
+    private readonly byte[] _blob;
+    private readonly Dictionary<ulong, long> _baseByHash;       // base-hash -> packed blob region
+    private readonly Dictionary<uint, string> _extByCode;        // ext-code  -> ".ext"
+
+    private QarDictionary(byte[] blob, Dictionary<ulong, long> baseByHash, Dictionary<uint, string> extByCode)
+    {
+        _blob       = blob;
         _baseByHash = baseByHash;
         _extByCode  = extByCode;
     }
 
     public string Resolve(ulong pathHash, out bool found)
     {
-        if (_baseByHash.TryGetValue(pathHash & GameHash.PATH_CODE_BASE_MASK, out var basePath))
+        if (_baseByHash.TryGetValue(pathHash & GameHash.PATH_CODE_BASE_MASK, out var packed))
         {
             found = true;
+            var basePath = System.Text.Encoding.UTF8.GetString(_blob, (int)(packed >> 24), (int)(packed & 0xFFFFFF));
             uint extCode = GameHash.ExtCodeOf(pathHash);
             if (extCode != 0 && _extByCode.TryGetValue(extCode, out var ext))
                 return basePath + ext;
@@ -73,22 +86,31 @@ public sealed class QarDictionary
             if (!File.Exists(path))
                 throw new FileNotFoundException(
                     $"QAR dictionary not found: {path}. Ship {DictionaryFileName} next to the executable.", path);
-            IEnumerable<string> lines = File.ReadAllLines(path);
 
-            var baseByHash = new Dictionary<ulong, string>(capacity: 128 * 1024);
-            foreach (var raw in lines)
+            // Streamed line-by-line (no ReadAllLines double-buffer); line strings
+            // are transient — retained lines land in the blob as UTF-8 bytes.
+            var baseByHash = new Dictionary<ulong, long>(capacity: 1 << 20);
+            using var blob = new MemoryStream(checked((int)new FileInfo(path).Length));
+            using (var sr = new StreamReader(path))
             {
-                var line = raw.TrimEnd('\r').Trim();
-                if (line.Length == 0) continue;
-                ulong key = GameHash.PathCode(line) & GameHash.PATH_CODE_BASE_MASK;
-                baseByHash.TryAdd(key, line);
+                string? raw;
+                while ((raw = sr.ReadLine()) is not null)
+                {
+                    var line = raw.Trim();
+                    if (line.Length == 0) continue;
+                    ulong key = GameHash.PathCode(line) & GameHash.PATH_CODE_BASE_MASK;
+                    var bytes = System.Text.Encoding.UTF8.GetBytes(line);
+                    if (bytes.Length > 0xFFFFFF) throw new InvalidDataException("dictionary line too long");
+                    if (baseByHash.TryAdd(key, ((long)blob.Position << 24) | (uint)bytes.Length))
+                        blob.Write(bytes, 0, bytes.Length);
+                }
             }
 
             var extByCode = new Dictionary<uint, string>(KnownExtensions.Length);
             foreach (var ext in KnownExtensions)
                 extByCode.TryAdd(GameHash.ExtensionCode(ext), ext);
 
-            _cached     = new QarDictionary(baseByHash, extByCode);
+            _cached     = new QarDictionary(blob.ToArray(), baseByHash, extByCode);
             _cachedPath = path;
             return _cached;
         }
