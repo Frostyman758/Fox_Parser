@@ -5,7 +5,7 @@ using MgsvModBldr.Tools.GameHashing;
 
 namespace MgsvModBldr.Tools.Fpk;
 
-internal static class FpkCrypto
+public static class FpkCrypto
 {
     private static ulong KeyHash(string entryName)
     {

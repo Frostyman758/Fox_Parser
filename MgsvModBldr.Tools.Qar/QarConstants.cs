@@ -1,7 +1,7 @@
 // Based on datfpk qar/qar.go, crypto/crypto.go
 namespace MgsvModBldr.Tools.Qar;
 
-internal static class QarConstants
+public static class QarConstants
 {
     public static readonly byte[] Magic = { 0x53, 0x51, 0x41, 0x52 }; // "SQAR"
 

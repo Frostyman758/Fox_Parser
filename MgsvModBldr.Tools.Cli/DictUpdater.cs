@@ -16,6 +16,7 @@ internal static class DictUpdater
         ("qar_dictionary.txt",                "GzsTool/qar_dictionary.txt",                        false),
         ("gzs_dictionary.txt",                "GzsTool/gzs_dictionary.txt",                        false),
         ("fpk_dictionary.txt",                "fpk/fpk_dictionary.txt",                            true),
+        ("bone_dictionary.txt",               "FmdlTool/Dictionaries/bones.txt",                   false),
         ("lang_dictionary.txt",               "LangTool/lang_dictionary.txt",                      false),
         ("mtar_dictionary.txt",               "MtarTool/mtar_dictionary.txt",                      false),
         ("spch_label_dictionary.txt",         "spch/Dictionaries/spch_labelname_dictionary.txt",   false),

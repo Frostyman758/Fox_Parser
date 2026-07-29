@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Read-only archive VFS: chain-open, lazy-list, on-demand decode.
+       Consumed managed (FoxBrowser) and source-included by Fox_shellext's
+       NativeAOT bridge — keep every file AOT-clean (no JSON, no reflection). -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>annotations</Nullable>
+    <RootNamespace>MgsvModBldr.Tools.Browse</RootNamespace>
+    <AssemblyName>MgsvModBldr.Tools.Browse</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MgsvModBldr.Tools.Qar\MgsvModBldr.Tools.Qar.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.Fpk\MgsvModBldr.Tools.Fpk.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.Pftxs\MgsvModBldr.Tools.Pftxs.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.G0s\MgsvModBldr.Tools.G0s.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.Fsop\MgsvModBldr.Tools.Fsop.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.Mtar\MgsvModBldr.Tools.Mtar.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.Ftex\MgsvModBldr.Tools.Ftex.csproj" />
+  </ItemGroup>
+</Project>

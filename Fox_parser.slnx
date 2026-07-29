@@ -22,6 +22,7 @@
   <Project Path="MgsvModBldr.Tools.Sbp/MgsvModBldr.Tools.Sbp.csproj" />
   <Project Path="MgsvModBldr.Tools.Stp/MgsvModBldr.Tools.Stp.csproj" />
   <Project Path="MgsvModBldr.Tools.G0s/MgsvModBldr.Tools.G0s.csproj" />
+  <Project Path="MgsvModBldr.Tools.Browse/MgsvModBldr.Tools.Browse.csproj" />
   <Project Path="MgsvModBldr.Tools.Ui/MgsvModBldr.Tools.Ui.csproj" />
   <Project Path="MgsvModBldr.Tools.Cli/MgsvModBldr.Tools.Cli.csproj" />
   <Project Path="MgsvModBldr.Tools.App/MgsvModBldr.Tools.App.csproj" />
