@@ -1,5 +1,5 @@
 // Based on MtarTool.Core/Utility/NameResolver.cs
-// Changes from the original: CityHash -> Core.CityHash64; dictionary
+// Changes from the original: CityHash -> GameHashing.GameCityHash; dictionary
 // loaded tolerantly from AppContext.BaseDirectory (empty if absent, so
 // the tool never crashes — unresolved hashes round-trip as hex); the
 // linear hash search is replaced with an O(1) lookup (first entry wins,
@@ -8,7 +8,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using CityHash = MgsvModBldr.Core.CityHash64;
+using CityHash = MgsvModBldr.Tools.GameHashing.GameCityHash;
 
 namespace MgsvModBldr.Tools.Mtar.Utility
 {

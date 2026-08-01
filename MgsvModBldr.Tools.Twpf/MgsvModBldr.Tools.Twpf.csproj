@@ -7,9 +7,9 @@
     <AssemblyName>MgsvModBldr.Tools.Twpf</AssemblyName>
   </PropertyGroup>
   <!-- TwpfXmlTool port: .twpf weather-parameter files <-> XML. Reuses
-       Core.CityHash64 for the StringId StrCode (matches the game's
+       GameCityHash for the StringId StrCode (matches the game's
        hashing, same as Atvaark's CityHash dep). -->
   <ItemGroup>
-    <ProjectReference Include="..\..\mgsv_modbldr\csgui\MgsvModBldr.Core\MgsvModBldr.Core.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.GameHashing\MgsvModBldr.Tools.GameHashing.csproj" />
   </ItemGroup>
 </Project>

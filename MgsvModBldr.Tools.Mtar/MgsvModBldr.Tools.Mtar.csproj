@@ -7,9 +7,9 @@
     <AssemblyName>MgsvModBldr.Tools.Mtar</AssemblyName>
   </PropertyGroup>
   <!-- MtarTool port: .mtar motion archives (v1 + v2). NameResolver
-       reuses Core.CityHash64 (== game hashing). Ships mtar_dictionary.txt
+       reuses GameCityHash (== game hashing). Ships mtar_dictionary.txt
        loose next to the exe. -->
   <ItemGroup>
-    <ProjectReference Include="..\..\mgsv_modbldr\csgui\MgsvModBldr.Core\MgsvModBldr.Core.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.GameHashing\MgsvModBldr.Tools.GameHashing.csproj" />
   </ItemGroup>
 </Project>

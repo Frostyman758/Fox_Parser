@@ -2,7 +2,7 @@
 using System;
 using System.IO;
 using System.Xml.Serialization;
-using CityHash = MgsvModBldr.Core.CityHash64;
+using CityHash = MgsvModBldr.Tools.GameHashing.GameCityHash;
 
 namespace MgsvModBldr.Tools.Twpf
 {

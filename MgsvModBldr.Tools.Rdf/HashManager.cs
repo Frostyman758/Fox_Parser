@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
-using CityHash = MgsvModBldr.Core.CityHash64;
+using CityHash = MgsvModBldr.Tools.GameHashing.GameCityHash;
 
 namespace MgsvModBldr.Tools.Rdf
 {

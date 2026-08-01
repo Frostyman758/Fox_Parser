@@ -9,9 +9,9 @@
   <!-- GZ QAR (.g0s) — the Ground Zeroes archive format (GzsTool 0.2 lineage).
        Footer-based, offset-keyed XOR + an optional inner cipher. Unlike the
        reference we re-encrypt the inner layer on repack, so .g0s round-trips
-       byte-exact (GzsTool 0.2 stubbed that out). Uses Core.CityHash64 (legacy
+       byte-exact (GzsTool 0.2 stubbed that out). Uses GameCityHash (legacy
        CityHash, == the game) for path hashing; ships gzs_dictionary.txt. -->
   <ItemGroup>
-    <ProjectReference Include="..\..\mgsv_modbldr\csgui\MgsvModBldr.Core\MgsvModBldr.Core.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.GameHashing\MgsvModBldr.Tools.GameHashing.csproj" />
   </ItemGroup>
 </Project>

@@ -1,9 +1,9 @@
-// In-process Core.IFpkArchiver backed by the managed FpkFile
-using MgsvModBldr.Core;
-
+// In-process fpk pack + enumerate via managed FpkFile
 namespace MgsvModBldr.Tools.Fpk;
 
-public sealed class ManagedFpkArchiver : IFpkArchiver
+public readonly record struct FpkInnerFile(string Vpath, byte[] Data);
+
+public sealed class ManagedFpkArchiver
 {
     public void Pack(bool isFpkd, IReadOnlyList<string> entryVpaths, string contentDir, string outFile)
     {

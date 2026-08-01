@@ -7,9 +7,9 @@
     <AssemblyName>MgsvModBldr.Tools.Rdf</AssemblyName>
   </PropertyGroup>
   <!-- RdfTool port: .rdf radio dialogue (GZ v1 + TPP v3). StrCode32
-       reuses Core.CityHash64 (== game hashing); FNV1 self-contained.
+       reuses GameCityHash (== game hashing); FNV1 self-contained.
        Ships the rdf_* dictionaries loose next to the exe. -->
   <ItemGroup>
-    <ProjectReference Include="..\..\mgsv_modbldr\csgui\MgsvModBldr.Core\MgsvModBldr.Core.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.GameHashing\MgsvModBldr.Tools.GameHashing.csproj" />
   </ItemGroup>
 </Project>

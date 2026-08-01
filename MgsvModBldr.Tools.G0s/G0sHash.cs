@@ -1,5 +1,5 @@
 // GZ path hashing + name resolution
-using MgsvModBldr.Core;
+using MgsvModBldr.Tools.GameHashing;
 
 namespace MgsvModBldr.Tools.G0s;
 
@@ -27,7 +27,7 @@ public static class G0sHash
     {
         const ulong seed0 = 0x9ae16a3b2f90404fUL;
         ulong seed1 = text.Length > 0 ? (uint)(text[0] << 16) + (uint)text.Length : 0;
-        return CityHash64.CityHash64WithSeeds(text + "\0", seed0, seed1) & HashMask;
+        return GameCityHash.CityHash64WithSeeds(text + "\0", seed0, seed1) & HashMask;
     }
 
     public static ulong HashFileNameWithExtension(string filePath)

@@ -9,8 +9,8 @@
   <!-- FoxEngine.TranslationTool port: .subp (subtitles), .ffnt (fonts),
        .lng (language). Subp uses ISO-8859-5 (rus) via the CodePages provider,
        which is part of the .NET 10 shared framework — no package needed. -->
-  <!-- Lang (.lng) StrCode32 reuses Core.CityHash64 (== game hashing). -->
+  <!-- Lang (.lng) StrCode32 reuses GameCityHash (== game hashing). -->
   <ItemGroup>
-    <ProjectReference Include="..\..\mgsv_modbldr\csgui\MgsvModBldr.Core\MgsvModBldr.Core.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.GameHashing\MgsvModBldr.Tools.GameHashing.csproj" />
   </ItemGroup>
 </Project>

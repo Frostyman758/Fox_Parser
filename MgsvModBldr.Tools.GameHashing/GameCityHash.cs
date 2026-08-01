@@ -10,7 +10,7 @@ internal readonly struct UInt128
     public ulong High { get; }
 }
 
-internal static class GameCityHash
+public static class GameCityHash
 {
     private const ulong K0 = 0xc3a5c85c97cb3127;
     private const ulong K1 = 0xb492b66fbe98f273;

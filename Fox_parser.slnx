@@ -1,8 +1,6 @@
 <Solution>
-  <!-- Fox Engine parser toolset (own repo). The tools depend on
-       MgsvModBldr.Core for shared hashing primitives + the IFpkArchiver
-       bridge; Core lives in the sibling mod-builder repo and is included
-       here (kept wired) so the solution resolves standalone. -->
+  <!-- Fox Engine parser toolset (own repo). Fully standalone — no
+       references outside this tree. -->
   <Project Path="MgsvModBldr.Tools.GameHashing/MgsvModBldr.Tools.GameHashing.csproj" />
   <Project Path="MgsvModBldr.Tools.PathResolve/MgsvModBldr.Tools.PathResolve.csproj" />
   <Project Path="MgsvModBldr.Tools.Fsop/MgsvModBldr.Tools.Fsop.csproj" />
@@ -10,6 +8,7 @@
   <Project Path="MgsvModBldr.Tools.Fox/MgsvModBldr.Tools.Fox.csproj" />
   <Project Path="MgsvModBldr.Tools.Qar/MgsvModBldr.Tools.Qar.csproj" />
   <Project Path="MgsvModBldr.Tools.Fpk/MgsvModBldr.Tools.Fpk.csproj" />
+  <Project Path="MgsvModBldr.Tools.Mgsv/MgsvModBldr.Tools.Mgsv.csproj" />
   <Project Path="MgsvModBldr.Tools.Pftxs/MgsvModBldr.Tools.Pftxs.csproj" />
   <Project Path="MgsvModBldr.Tools.Translation/MgsvModBldr.Tools.Translation.csproj" />
   <Project Path="MgsvModBldr.Tools.Twpf/MgsvModBldr.Tools.Twpf.csproj" />
@@ -46,5 +45,4 @@
   <Project Path="MgsvModBldr.Tools.Stp.Tests/MgsvModBldr.Tools.Stp.Tests.csproj" />
   <Project Path="MgsvModBldr.Tools.G0s.Tests/MgsvModBldr.Tools.G0s.Tests.csproj" />
   <Project Path="MgsvModBldr.Tools.Ui.Tests/MgsvModBldr.Tools.Ui.Tests.csproj" />
-  <Project Path="../mgsv_modbldr/csgui/MgsvModBldr.Core/MgsvModBldr.Core.csproj" />
 </Solution>

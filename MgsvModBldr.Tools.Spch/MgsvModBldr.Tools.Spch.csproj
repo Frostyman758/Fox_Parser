@@ -6,10 +6,10 @@
     <RootNamespace>MgsvModBldr.Tools.Spch</RootNamespace>
     <AssemblyName>MgsvModBldr.Tools.Spch</AssemblyName>
   </PropertyGroup>
-  <!-- SpchTool port: .spch speech tables. StrCode32 reuses Core.CityHash64
+  <!-- SpchTool port: .spch speech tables. StrCode32 reuses GameCityHash
        (== game hashing); FNV1 is self-contained. Ships the spch_*
        dictionaries loose next to the exe. -->
   <ItemGroup>
-    <ProjectReference Include="..\..\mgsv_modbldr\csgui\MgsvModBldr.Core\MgsvModBldr.Core.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.GameHashing\MgsvModBldr.Tools.GameHashing.csproj" />
   </ItemGroup>
 </Project>

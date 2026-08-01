@@ -8,9 +8,6 @@
   </PropertyGroup>
   <!-- Shared test harness for the per-tool .Tests projects: the
        IToolTests contract, generic byte-compare/parallel helpers, and
-       environment locators (fixtures dir, datfpk reference). References
-       Core only for the datfpk path stored in builder.xml. -->
-  <ItemGroup>
-    <ProjectReference Include="..\..\mgsv_modbldr\csgui\MgsvModBldr.Core\MgsvModBldr.Core.csproj" />
-  </ItemGroup>
+       environment locators (fixtures dir, datfpk reference — read
+       straight from builder.xml). -->
 </Project>

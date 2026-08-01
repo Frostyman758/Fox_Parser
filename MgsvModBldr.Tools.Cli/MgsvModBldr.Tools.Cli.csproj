@@ -10,8 +10,8 @@
        its own project/DLL (folder name == DLL name) so the toolset is
        modular. The thin modbldr-tools.exe launcher forwards argv here. -->
   <ItemGroup>
-    <ProjectReference Include="..\..\mgsv_modbldr\csgui\MgsvModBldr.Core\MgsvModBldr.Core.csproj" />
     <ProjectReference Include="..\MgsvModBldr.Tools.GameHashing\MgsvModBldr.Tools.GameHashing.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.Mgsv\MgsvModBldr.Tools.Mgsv.csproj" />
     <ProjectReference Include="..\MgsvModBldr.Tools.Fsop\MgsvModBldr.Tools.Fsop.csproj" />
     <ProjectReference Include="..\MgsvModBldr.Tools.Ftex\MgsvModBldr.Tools.Ftex.csproj" />
     <ProjectReference Include="..\MgsvModBldr.Tools.Fox\MgsvModBldr.Tools.Fox.csproj" />

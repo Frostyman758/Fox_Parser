@@ -1,7 +1,6 @@
 // Based on datfpk cli/main.go ExtractQar/PackQar
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using MgsvModBldr.Core;
 
 namespace MgsvModBldr.Tools.Qar;
 

@@ -74,17 +74,12 @@ public static class Cli
                 Console.WriteLine($"{MgsvModBldr.Tools.GameHashing.GameHash.StringId(p):x16}  {p}");
             return 0;
         }
-        // buildmgsv <sourceDir> <out.mgsv> — exercise the full ModBuilder
-        // pipeline with the in-process managed FPK archiver (no datfpk).
+        // buildmgsv <sourceDir> <out.mgsv> — full .mgsv mod build pipeline
         if (args[0] == "buildmgsv")
         {
             if (args.Length < 3) { Console.Error.WriteLine("usage: buildmgsv <sourceDir> <out.mgsv>"); return 2; }
-            var meta = MgsvModBldr.Core.ModMetadata.Load(Path.Combine(args[1], "metadata.xml"));
-            var builder = new MgsvModBldr.Core.ModBuilder
-            {
-                FpkArchiver = new MgsvModBldr.Tools.Fpk.ManagedFpkArchiver(),
-                Log = Console.WriteLine,
-            };
+            var meta = MgsvModBldr.Tools.Mgsv.ModMetadata.Load(Path.Combine(args[1], "metadata.xml"));
+            var builder = new MgsvModBldr.Tools.Mgsv.ModBuilder { Log = Console.WriteLine };
             builder.Build(args[1], meta, args[2]);
             return 0;
         }

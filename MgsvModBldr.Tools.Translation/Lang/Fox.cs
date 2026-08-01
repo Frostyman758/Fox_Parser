@@ -1,5 +1,5 @@
 // Based on LangTool/Utility/Fox.cs
-using CityHash = MgsvModBldr.Core.CityHash64;
+using CityHash = MgsvModBldr.Tools.GameHashing.GameCityHash;
 
 namespace MgsvModBldr.Tools.Translation.Lang
 {
