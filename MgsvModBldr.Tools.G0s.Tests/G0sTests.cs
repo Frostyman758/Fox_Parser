@@ -25,6 +25,9 @@ public sealed class G0sTests : IToolTests
         var (sp, sf) = SyntheticGate();
         pass += sp; fail += sf;
 
+        var (ap, af) = AsPathGate();
+        pass += ap; fail += af;
+
         // Opt-in full round-trip vs the real game file (heavy: ~1.6 GB).
         if (Environment.GetEnvironmentVariable("G0S_FULL") == "1")
         {
@@ -97,6 +100,33 @@ public sealed class G0sTests : IToolTests
         bool pass = bad == 0 && ok > 0;
         Console.WriteLine($"  [{(pass ? "PASS" : "FAIL")}] data_02.g0s sample: {ok}/{sample.Count} decrypt+roundtrip ok " +
                           $"({inner} inner-encrypted, {missing} name-unresolved){(firstErr != null ? " :: " + firstErr : "")}");
+        return pass ? (1, 0) : (0, 1);
+    }
+
+    // ── (B2) /as/ decode vs the PS3-harvested cipher→plain pair table ───────
+    private static (int, int) AsPathGate()
+    {
+        var tsv = @"C:\rsearch\Fox_parser\MgsvModBldr.Tools.Ui\Uif\gz_as_texmap.tsv";
+        if (!File.Exists(tsv)) { Console.WriteLine("  [skip] aspath: pair table not found"); return (0, 0); }
+
+        int ok = 0, bad = 0, undecoded = 0; string firstErr = null;
+        foreach (var line in File.ReadAllLines(tsv))
+        {
+            int t = line.IndexOf('\t');
+            if (t <= 0) continue;
+            var cipher = System.Text.Encoding.UTF8.GetString(Convert.FromHexString(line[..t]));
+            var plain = line[(t + 1)..];
+
+            if (!GzAsPath.TryDecodeId(cipher, out var id)) { undecoded++; firstErr ??= $"no marker/payload: {plain}"; continue; }
+            var expect = G0sHash.HashFileNameWithExtension(plain);
+            if (id == expect) ok++;
+            else { bad++; firstErr ??= $"{plain}: decoded {id:x16} != {expect:x16}"; }
+        }
+
+        bool pass = bad == 0 && undecoded == 0 && ok > 0;
+        Console.WriteLine($"  [{(pass ? "PASS" : "FAIL")}] aspath: {ok} pairs decode to the real PathId" +
+                          $"{(undecoded > 0 ? $", {undecoded} undecoded" : "")}{(bad > 0 ? $", {bad} wrong" : "")}" +
+                          $"{(firstErr != null ? " :: " + firstErr : "")}");
         return pass ? (1, 0) : (0, 1);
     }
 
