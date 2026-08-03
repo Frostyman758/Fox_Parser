@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <RootNamespace>MgsvModBldr.Tools.Streaming</RootNamespace>
+    <AssemblyName>MgsvModBldr.Tools.Streaming</AssemblyName>
+  </PropertyGroup>
+  <!-- Archive streaming + splicing (the FastBite engine, folded in 03/08/2026).
+       Reads a .dat/.g0s index without unpacking, streams ONE entry out, and
+       rewrites an archive by copying unchanged blocks verbatim and re-encoding
+       only what changed. Namespace is Streaming, not Stream — `Stream` would
+       shadow System.IO.Stream for every consumer that uses this. -->
+  <ItemGroup>
+    <ProjectReference Include="..\MgsvModBldr.Tools.GameHashing\MgsvModBldr.Tools.GameHashing.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.Qar\MgsvModBldr.Tools.Qar.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.Fpk\MgsvModBldr.Tools.Fpk.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.G0s\MgsvModBldr.Tools.G0s.csproj" />
+  </ItemGroup>
+</Project>

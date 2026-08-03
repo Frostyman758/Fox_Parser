@@ -19,6 +19,7 @@ using MgsvModBldr.Tools.Sbp.Tests;
 using MgsvModBldr.Tools.Stp.Tests;
 using MgsvModBldr.Tools.G0s.Tests;
 using MgsvModBldr.Tools.Ui.Tests;
+using MgsvModBldr.Tools.Streaming.Tests;
 
 namespace MgsvModBldr.Tools.Tests;
 
@@ -47,6 +48,7 @@ public static class TestRunner
         new StpTests(),
         new G0sTests(),
         new UiTests(),
+        new StreamingTests(),
     };
 
     public static int Run(bool harvest, string toolFilter = null)

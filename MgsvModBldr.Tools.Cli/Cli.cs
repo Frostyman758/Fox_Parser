@@ -97,6 +97,11 @@ public static class Cli
         if (args[0] == "gzui")
             return GzUiCmd.Run(args);
 
+        // stream: pull ONE entry out of an archive (or a whole game install)
+        // without unpacking it.
+        if (args[0] == "stream")
+            return StreamCmd.Run(args);
+
         // `test` is a subcommand, not a file path — handle before file checks.
         //   test                  -> run everything
         //   test <tool>           -> run just that tool (fsop|fox|ftex)
@@ -122,7 +127,7 @@ public static class Cli
     {
         "hash", "foxhash", "unhash", "lookup", "pathcode", "stringid",
         "buildmgsv", "update-dicts", "updatedicts", "update-dictionaries",
-        "gzui", "test",
+        "gzui", "stream", "test",
     };
 
     private static int ExecuteFileOp(string[] args, LogoMode logo)
@@ -313,6 +318,7 @@ public static class Cli
         Console.WriteLine("  unhash <hex...> [-d file]      reverse-lookup hashes against dict/*.txt (+extra wordlists)");
         Console.WriteLine("  pathcode | stringid <str...>   single-variant forward hash");
         Console.WriteLine("  update-dicts [-repo r]         refresh dict/ from mgsv-lookup-strings");
+        Console.WriteLine("  stream <archive> <path|hash>   extract ONE entry, no unpack (--list, --game <dir>)");
         Console.WriteLine("  test [<tool>] [--harvest]      regression suite");
         Console.WriteLine("  buildmgsv <srcDir> <out.mgsv>  full mod build pipeline");
     }
