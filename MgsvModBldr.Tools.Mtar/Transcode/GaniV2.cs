@@ -25,6 +25,70 @@ namespace MgsvModBldr.Tools.Mtar.Transcode
         /// <summary>Blobs are 16-byte aligned in the shipped files; match that.</summary>
         private const int BlobAlign = 16;
 
+        /// <summary>
+        /// With a <paramref name="shared"/> layout the body is written in the SHARED slot order,
+        /// not the clip's own — a slot this clip does not animate gets bit size 0 and offset 0.
+        /// That is how one .trk covers clips whose segment lists differ (see UnionLayout).
+        /// </summary>
+        public static byte[] Write(V1Gani gani, UnionLayout shared)
+        {
+            if (shared is null) return Write(gani);
+
+            var map = shared.SlotMap(gani);
+            int unitCount = shared.Units.Count;
+
+            int pos = 8;
+            pos += unitCount;
+            pos = Align(pos, 4);
+            int tableAt = pos;
+            pos += map.Length * 4;
+            pos += 16;
+            int blobsAt = Align(pos, BlobAlign);
+
+            var offsets = new int[map.Length];
+            int cursor = blobsAt;
+            for (int i = 0; i < map.Length; i++)
+            {
+                if (map[i] is null || !map[i].HasData) { offsets[i] = 0; continue; }
+                offsets[i] = cursor;
+                cursor += map[i].Blob.Length;
+            }
+            int total = Align(cursor, BlobAlign);
+
+            var outp = new byte[total];
+            using var ms = new MemoryStream(outp);
+            using var w = new BinaryWriter(ms);
+
+            w.Write((uint)gani.FrameCount);
+            w.Write((byte)0);
+            w.Write((byte)0);
+            w.Write((ushort)0);
+            // One flag byte per SHARED unit, in shared order — 0 for a unit this clip does
+            // not drive at all (facial clips drive as few as 8 of 38).
+            var unitMap = shared.UnitMap(gani);
+            for (int i = 0; i < unitCount; i++)
+                w.Write((byte)(unitMap[i]?.Flags ?? 0));
+            ms.Position = tableAt;
+
+            for (int i = 0; i < map.Length; i++)
+            {
+                int rel = offsets[i] == 0 ? 0 : offsets[i] - (tableAt + i * 4);
+                if (rel < 0 || rel > 0xFFFFFF)
+                    throw new InvalidDataException($"segment {i} blob offset {rel} does not fit in 24 bits");
+                w.Write((byte)(map[i]?.ComponentBitSize ?? 0));
+                w.Write((byte)(rel & 0xFF));
+                w.Write((byte)((rel >> 8) & 0xFF));
+                w.Write((byte)((rel >> 16) & 0xFF));
+            }
+
+            for (int i = 0; i < map.Length; i++)
+            {
+                if (offsets[i] == 0) continue;
+                Buffer.BlockCopy(map[i].Blob, 0, outp, offsets[i], map[i].Blob.Length);
+            }
+            return outp;
+        }
+
         public static byte[] Write(V1Gani gani)
         {
             var segs = new List<V1Segment>(gani.Flat());

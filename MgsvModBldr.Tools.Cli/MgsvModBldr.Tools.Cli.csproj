@@ -31,6 +31,7 @@
     <ProjectReference Include="..\MgsvModBldr.Tools.Stp\MgsvModBldr.Tools.Stp.csproj" />
     <ProjectReference Include="..\MgsvModBldr.Tools.G0s\MgsvModBldr.Tools.G0s.csproj" />
     <ProjectReference Include="..\MgsvModBldr.Tools.Streaming\MgsvModBldr.Tools.Streaming.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.Anim\MgsvModBldr.Tools.Anim.csproj" />
   </ItemGroup>
   <!-- Per-tool test suites (the `test` subcommand aggregates these via
        IToolTests). Each lives next to its tool so a tool can be lifted
@@ -57,5 +58,6 @@
     <ProjectReference Include="..\MgsvModBldr.Tools.G0s.Tests\MgsvModBldr.Tools.G0s.Tests.csproj" />
     <ProjectReference Include="..\MgsvModBldr.Tools.Ui.Tests\MgsvModBldr.Tools.Ui.Tests.csproj" />
     <ProjectReference Include="..\MgsvModBldr.Tools.Streaming.Tests\MgsvModBldr.Tools.Streaming.Tests.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.Anim\MgsvModBldr.Tools.Anim.csproj" />
   </ItemGroup>
 </Project>

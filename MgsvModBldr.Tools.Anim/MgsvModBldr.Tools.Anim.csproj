@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>annotations</Nullable>
+    <RootNamespace>MgsvModBldr.Tools.Anim</RootNamespace>
+    <AssemblyName>MgsvModBldr.Tools.Anim</AssemblyName>
+  </PropertyGroup>
+  <!-- Gani keyframe decode + rig (.frig) reading. Ported VERBATIM from FoxBrowser's
+       viewer, which is validated against the engine (0.017 deg pose parity) — the math
+       is copied rather than re-derived so the two cannot disagree. Kept dependency-free
+       (System.Numerics only) so any tool can pose a clip without the viewer. -->
+</Project>

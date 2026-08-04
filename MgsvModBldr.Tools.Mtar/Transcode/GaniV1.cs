@@ -15,8 +15,9 @@ namespace MgsvModBldr.Tools.Mtar.Transcode
         public byte[] Blob = Array.Empty<byte>();   // empty when the segment has no data
         public bool HasData => Blob.Length > 0;
 
-        /// <summary>Absolute blob start while reading; -1 when the segment carries no data.</summary>
-        internal int BlobStart = -1;
+        /// <summary>Absolute blob start while reading; -1 when the segment carries no data.
+        /// Public so a caller that edits blobs in place (the mirror) can write them back.</summary>
+        public int BlobStart = -1;
     }
 
     /// <summary>One track (bone): name hash, flags, segments.</summary>
@@ -34,6 +35,12 @@ namespace MgsvModBldr.Tools.Mtar.Transcode
         public int FrameScaleByte;
         public int SegmentCount;
         public List<V1Unit> Units = new List<V1Unit>();
+
+        /// <summary>Absolute offset of the UNIT node's payload — the track layout. A v1 gani
+        /// carries it inline; a v2 archive keeps ONE copy as the .trk. The two are the same
+        /// bytes, so MtarTrackInfo.Read parses this directly and a v2 container can be built
+        /// without a donor template.</summary>
+        public int LayoutOffset;
 
         /// <summary>
         /// The gani's event list, verbatim — magic 0x0BFE2CF6, a count, then offsets.
@@ -209,6 +216,7 @@ namespace MgsvModBldr.Tools.Mtar.Transcode
                 Events = events,
                 MotionPoints = motionPoints,
                 MotionPointParents = mpParents,
+                LayoutOffset = pay,
                 SegmentCount = segCount,
                 FrameCount = (int)BitConverter.ToUInt32(file, pay + 12),
                 FrameScaleByte = (sbyte)(BitConverter.ToUInt32(file, pay + 16) & 0xFF),

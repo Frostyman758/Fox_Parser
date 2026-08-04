@@ -48,6 +48,7 @@ internal static class GaniCmd
 
         if (args.Contains("--probehash")) return ProbeHash(mtar, dictPath);
         if (args.Contains("--probe")) return Probe(mtar, dictPath);
+        if (args.Contains("--layout")) return Layout(mtar);
 
         var map = MtarGaniNames.LoadDictionary(dictPath);
         if (map.Count == 0)
@@ -80,6 +81,108 @@ internal static class GaniCmd
                               + $"ext codes: {string.Join(", ", exts.Select(kv => $"{kv.Key}x{kv.Value}"))} · "
                               + $"dictionary {map.Count:N0} names");
         return named > 0 ? 0 : 1;
+    }
+
+    /// <summary>
+    /// Per-clip track layout: which units a clip drives and each unit's segment TYPES, in file
+    /// order. This is what a shared v2 .trk has to be the union of, so it is what to read when a
+    /// rebuilt layout disagrees with the archive header's own unit/segment totals.
+    /// </summary>
+    private static int Layout(string mtar)
+    {
+        var b = File.ReadAllBytes(mtar);
+        uint count = BitConverter.ToUInt32(b, 4);
+        int stride = EntryStride(b);
+        Console.WriteLine($"header: {BitConverter.ToUInt16(b, 8)} units / {BitConverter.ToUInt16(b, 10)} segments, {count} clips\n");
+
+        // Every distinct unit-name sequence, and every distinct per-unit type sequence.
+        var unitSeqs = new Dictionary<string, int>();
+        var perUnit = new SortedDictionary<uint, SortedDictionary<string, int>>();
+        for (int i = 0; i < count; i++)
+        {
+            int at = 0x20 + i * stride;
+            if (at + 16 > b.Length) break;
+            var g = MgsvModBldr.Tools.Mtar.Transcode.GaniV1.Read(
+                b, (int)BitConverter.ToUInt32(b, at + 8), (int)BitConverter.ToUInt32(b, at + 12));
+            if (g is null) continue;
+
+            var names = string.Join(",", g.Units.ConvertAll(u => u.Name.ToString("x8")));
+            unitSeqs[names] = unitSeqs.GetValueOrDefault(names) + 1;
+            foreach (var u in g.Units)
+            {
+                if (!perUnit.TryGetValue(u.Name, out var seqs)) perUnit[u.Name] = seqs = new SortedDictionary<string, int>();
+                var types = string.Join("/", u.Segments.ConvertAll(s => s.Type.ToString()));
+                seqs[types] = seqs.GetValueOrDefault(types) + 1;
+            }
+        }
+
+        Console.WriteLine($"{unitSeqs.Count} distinct unit-name sequence(s):");
+        foreach (var kv in unitSeqs) Console.WriteLine($"  x{kv.Value,-4} {kv.Key.Length} chars, {kv.Key.Split(',').Length} units");
+
+        Console.WriteLine($"\nunits that are NOT uniform across clips (these decide the union):");
+        int uniform = 0;
+        foreach (var kv in perUnit)
+        {
+            if (kv.Value.Count == 1) { uniform++; continue; }
+            Console.WriteLine($"  {kv.Key:x8}: " + string.Join("   ", kv.Value.Keys.Select(k => $"[{k}]")));
+        }
+        Console.WriteLine($"  ({uniform} of {perUnit.Count} units have one segment layout everywhere)");
+
+        int widest = 0;
+        foreach (var kv in perUnit)
+        {
+            int mx = 0;
+            foreach (var s in kv.Value.Keys) mx = Math.Max(mx, s.Length == 0 ? 0 : s.Split('/').Length);
+            widest += mx;
+        }
+        Console.WriteLine($"\nsum of each unit's WIDEST layout        : {widest} segments over {perUnit.Count} units");
+
+        // Same, but counting only segments that CARRY DATA somewhere. A record with no blob in
+        // any clip is a slot nothing ever fills, and the shared layout has no reason to hold it.
+        var withData = new SortedDictionary<uint, int>();
+        var everData = new SortedDictionary<uint, HashSet<int>>();
+        for (int i = 0; i < count; i++)
+        {
+            int at = 0x20 + i * stride;
+            if (at + 16 > b.Length) break;
+            var g = MgsvModBldr.Tools.Mtar.Transcode.GaniV1.Read(
+                b, (int)BitConverter.ToUInt32(b, at + 8), (int)BitConverter.ToUInt32(b, at + 12));
+            if (g is null) continue;
+            foreach (var u in g.Units)
+            {
+                if (!everData.TryGetValue(u.Name, out var set)) everData[u.Name] = set = new HashSet<int>();
+                for (int s = 0; s < u.Segments.Count; s++) if (u.Segments[s].HasData) set.Add(u.Segments[s].Type * 100 + s);
+            }
+        }
+        int used = 0;
+        foreach (var kv in everData) { withData[kv.Key] = kv.Value.Count; used += kv.Value.Count; }
+        Console.WriteLine($"sum counting only segments EVER carrying data: {used} segments");
+
+        // The LARGEST SINGLE clip. A v1 archive has no shared layout, so its header may well be
+        // sizing runtime buffers off the biggest clip rather than describing a union.
+        int maxUnits = 0, maxSegs = 0;
+        for (int i = 0; i < count; i++)
+        {
+            int at = 0x20 + i * stride;
+            if (at + 16 > b.Length) break;
+            var g = MgsvModBldr.Tools.Mtar.Transcode.GaniV1.Read(
+                b, (int)BitConverter.ToUInt32(b, at + 8), (int)BitConverter.ToUInt32(b, at + 12));
+            if (g is null) continue;
+            int n = 0;
+            foreach (var u in g.Units) n += u.Segments.Count;
+            maxUnits = Math.Max(maxUnits, g.Units.Count);
+            maxSegs = Math.Max(maxSegs, n);
+        }
+        Console.WriteLine($"largest SINGLE clip                     : {maxUnits} units / {maxSegs} segments");
+        Console.WriteLine("units whose record count exceeds their used count:");
+        foreach (var kv in perUnit)
+        {
+            int mx = 0;
+            foreach (var s in kv.Value.Keys) mx = Math.Max(mx, s.Length == 0 ? 0 : s.Split('/').Length);
+            int u2 = withData.GetValueOrDefault(kv.Key);
+            if (mx != u2) Console.WriteLine($"  {kv.Key:x8}: records {mx}, used {u2}");
+        }
+        return 0;
     }
 
     // Try a range of path NORMALISATIONS against the mtar's hashes and report which

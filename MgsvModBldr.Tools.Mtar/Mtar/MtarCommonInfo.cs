@@ -42,6 +42,10 @@ namespace MgsvModBldr.Tools.Mtar.Mtar
     {
         /// <summary>StrCode32. Empty means the unit offset was 0 — an absent slot.</summary>
         [XmlAttribute("Name")] public string name;
+        /// <summary>The bones this rig unit drives, from the built-in rig tables. A unit name is
+        /// a hash that reverses against no dictionary, so this is its only readable label.</summary>
+        [XmlAttribute("Bones")] public string bones;
+        [XmlIgnore] public bool bonesSpecified;
         /// <summary>fox::anim::TrackUnitFlags — LOOP=1, HERMITE_VECTOR_INTERPOLATION=2, IS_STATIC=4.</summary>
         [XmlAttribute("Flags")] public byte flags;
         [XmlAttribute("Pad")] public ushort pad;
@@ -84,10 +88,18 @@ namespace MgsvModBldr.Tools.Mtar.Mtar
             t.frameRate = (sbyte)b[at + 16];
             t.headerTail = $"{b[at + 17]:x2} {b[at + 18]:x2} {b[at + 19]:x2}";
 
+            var rig = MgsvModBldr.Tools.Anim.FrigBones.ForUnitCount(unitCount);
             for (int i = 0; i < unitCount; i++)
             {
                 uint off = BitConverter.ToUInt32(b, at + 0x14 + i * 4);
                 var u = new MtarTrackUnit();
+                if (rig is not null && i < rig.UnitBones.Length && rig.UnitBones[i].Length > 0)
+                {
+                    var nm = new List<string>();
+                    foreach (var h in rig.UnitBones[i]) nm.Add(StrCode32Names.Text(h));
+                    u.bones = string.Join(" ", nm);
+                    u.bonesSpecified = true;
+                }
                 if (off == 0) { u.absent = true; u.absentSpecified = true; t.units.Add(u); continue; }
                 u.offset = (int)off;
                 int ua = at + (int)off;
@@ -95,6 +107,13 @@ namespace MgsvModBldr.Tools.Mtar.Mtar
                 int segs = b[ua + 4];
                 u.flags = b[ua + 5];
                 u.pad = BitConverter.ToUInt16(b, ua + 6);
+                if (rig is not null && i < rig.UnitBones.Length && rig.UnitBones[i].Length > 0)
+                {
+                    var nm = new List<string>();
+                    foreach (var h in rig.UnitBones[i]) nm.Add(StrCode32Names.Text(h));
+                    u.bones = string.Join(" ", nm);
+                    u.bonesSpecified = true;
+                }
                 for (int s = 0; s < segs; s++)
                 {
                     int sa = ua + 8 + s * 8;

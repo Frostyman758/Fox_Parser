@@ -11,5 +11,7 @@
        loose next to the exe. -->
   <ItemGroup>
     <ProjectReference Include="..\MgsvModBldr.Tools.GameHashing\MgsvModBldr.Tools.GameHashing.csproj" />
+    <!-- .frig rig data: the mirror reads its left/right pairing from the rig's own masks. -->
+    <ProjectReference Include="..\MgsvModBldr.Tools.Anim\MgsvModBldr.Tools.Anim.csproj" />
   </ItemGroup>
 </Project>

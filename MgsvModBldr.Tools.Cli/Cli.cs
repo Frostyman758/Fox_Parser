@@ -118,6 +118,9 @@ public static class Cli
         if (args[0] == "mog")
             return MogCmd.Run(args);
 
+        if (args[0] == "mirror")
+            return MirrorCmd.Run(args);
+
         // `test` is a subcommand, not a file path — handle before file checks.
         //   test                  -> run everything
         //   test <tool>           -> run just that tool (fsop|fox|ftex)
@@ -143,7 +146,7 @@ public static class Cli
     {
         "hash", "foxhash", "unhash", "lookup", "pathcode", "stringid",
         "buildmgsv", "update-dicts", "updatedicts", "update-dictionaries",
-        "gzui", "stream", "index", "search", "find", "ganis", "transcode", "mog", "test",
+        "gzui", "stream", "index", "search", "find", "ganis", "transcode", "mirror", "mog", "test",
     };
 
     private static int ExecuteFileOp(string[] args, LogoMode logo)
