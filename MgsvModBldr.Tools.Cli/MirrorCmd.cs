@@ -17,6 +17,7 @@ internal static class MirrorCmd
     {
         if (args.Length < 2 || !File.Exists(args[1])) { Usage(); return 2; }
         string src = args[1], outPath = null, clip = null, asName = null, frigPath = null, solveL = null, solveR = null, revClip = null;
+        bool v2rt = false;
         var axis = GaniMirror.Axis.X;
         bool all = false, selftest = false, fit = false;
         string trackClip = null, diffL = null, diffR = null, bitClip = null;
@@ -37,6 +38,7 @@ internal static class MirrorCmd
             else if (args[i] == "--frig" && i + 1 < args.Length) frigPath = args[++i];
             else if (args[i] == "--solve" && i + 2 < args.Length) { solveL = args[++i]; solveR = args[++i]; }
             else if (args[i] == "--revtest" && i + 1 < args.Length) revClip = args[++i];
+            else if (args[i] == "--v2roundtrip") v2rt = true;
             else if (args[i] == "--pair" && i + 1 < args.Length)
             {
                 var p = args[++i].Split('=', ',');
@@ -47,6 +49,8 @@ internal static class MirrorCmd
                 extraPairs.Add((a, b));
             }
         }
+
+        if (v2rt) return V2RoundTripCmd.Run(src);   // v2 by definition — runs before the v1 gate
 
         var file = File.ReadAllBytes(src);
         if (MtarConverter.GetMtarType(src) != 1)

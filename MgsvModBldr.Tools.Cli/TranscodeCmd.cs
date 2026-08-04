@@ -98,8 +98,68 @@ internal static class TranscodeCmd
 
         // ── the source ganis ──
         var file = File.ReadAllBytes(src);
+
+        // A v2 source is read through the archive reader instead: the clip bodies carry the
+        // per-clip data and the shared .trk carries unit names and segment types, which together
+        // decode to the same shape a v1 gani does (GaniV2Read). That is what makes a
+        // character-to-character port possible — every shipped TPP character archive is v2.
+        MgsvModBldr.Tools.Mtar.Mtar.MtarFile2 v2Src = null;
+        List<byte[]> v2Bodies = null, v2Events = null, v2Motion = null;
+        var v2MpBone = new Dictionary<uint, uint>();
         if (MtarConverter.GetMtarType(src) != 1)
-        { Console.Error.WriteLine("FOXDIE: source is already a type-2 mtar"); return 2; }
+        {
+            v2Src = new MgsvModBldr.Tools.Mtar.Mtar.MtarFile2();
+            using var fs = File.OpenRead(src);
+            v2Src.Read(fs);
+            if (v2Src.trackInfo is null || v2Src.trackInfo.units.Count == 0)
+            { Console.Error.WriteLine("FOXDIE: source is a type-2 mtar with no readable .trk layout"); return 2; }
+            v2Bodies = new List<byte[]>(); v2Events = new List<byte[]>(); v2Motion = new List<byte[]>();
+            foreach (var f in v2Src.files)
+            {
+                fs.Position = 0;
+                v2Bodies.Add(f.ReadData(fs));
+                fs.Position = 0;
+                v2Events.Add(f.endChunkSize > 0 ? f.ReadEndChunkData(fs) : Array.Empty<byte>());
+                fs.Position = 0;
+                v2Motion.Add(f.motionPointsSize > 0 ? f.ReadMotionPointData(fs) : Array.Empty<byte>());
+            }
+            // v1 reads each motion point's parent bone out of the clip; a v2 archive declares
+            // them once, for all its clips, so the bone is a lookup rather than a parse.
+            if (v2Src.motionPointUnits is not null)
+                foreach (var u in v2Src.motionPointUnits.units)
+                    if (uint.TryParse(u.name, System.Globalization.NumberStyles.HexNumber, null, out var mn)
+                     && uint.TryParse(u.bone, System.Globalization.NumberStyles.HexNumber, null, out var bn))
+                        v2MpBone[mn] = bn;
+        }
+
+        // v1 addresses a clip by (offset, length) into the file; v2 by index. One reader either way.
+        V1Gani ReadClip(int at, int ln)
+        {
+            if (v2Src is null) return GaniV1.Read(file, at, ln);
+            if (at < 0 || at >= v2Bodies.Count) return null;
+            var g2 = GaniV2Read.Read(v2Bodies[at], v2Src.trackInfo, v2Src.trackInfo.frameRate);
+            if (g2 is null) return null;
+            g2.Events = v2Events[at];
+            // Motion points travel too, so a slot that carries root trajectory can be replaced
+            // rather than skipped. The .mtp is `u32 unitCount | 0x10 pad | unitCount x u32
+            // offset`, each offset pointing at that unit's MTP name hash.
+            var mp = v2Motion[at];
+            if (mp.Length >= 0x14)
+            {
+                g2.MotionPoints = mp;
+                int mpUnits = BitConverter.ToInt32(mp, 0);
+                for (int k = 0; k < mpUnits; k++)
+                {
+                    int slot = 0x14 + k * 4;
+                    if (slot + 4 > mp.Length) break;
+                    uint mo = BitConverter.ToUInt32(mp, slot);
+                    if (mo == 0 || mo + 4 > mp.Length) continue;
+                    uint mtp = BitConverter.ToUInt32(mp, (int)mo);
+                    if (v2MpBone.TryGetValue(mtp, out uint bone)) g2.MotionPointParents.Add((mtp, bone));
+                }
+            }
+            return g2;
+        }
 
         // The rig gives the left/right pairing AND the per-unit IK bend planes, which the mirror
         // has to carry across or a mirrored limb is solved against the wrong one.
@@ -113,7 +173,7 @@ internal static class TranscodeCmd
             rigPairs = GaniMirror.PairsFromRig(frig);
         }
 
-        int count = (int)BitConverter.ToUInt32(file, 4);
+        int count = v2Src is not null ? v2Src.files.Count : (int)BitConverter.ToUInt32(file, 4);
         var dict = MtarGaniNames.LoadDictionary(
             Path.Combine(AppContext.BaseDirectory, "dict", "mtar_dictionary.txt"));
 
@@ -209,11 +269,11 @@ internal static class TranscodeCmd
         for (int i = 0; i < count && names.Count < limit; i++)
         {
             int at = 0x20 + i * 16;
-            ulong hash = BitConverter.ToUInt64(file, at);
-            int off = (int)BitConverter.ToUInt32(file, at + 8);
-            int len = (int)BitConverter.ToUInt32(file, at + 12);
+            ulong hash = v2Src is not null ? v2Src.files[i].hash : BitConverter.ToUInt64(file, at);
+            int off = v2Src is not null ? i : (int)BitConverter.ToUInt32(file, at + 8);
+            int len = v2Src is not null ? 0 : (int)BitConverter.ToUInt32(file, at + 12);
 
-            var g = GaniV1.Read(file, off, len);
+            var g = ReadClip(off, len);
             if (g is null) { skipped++; continue; }
 
             // With a template the .trk is fixed, so every clip must match it exactly. Without
@@ -264,7 +324,7 @@ internal static class TranscodeCmd
                     if (rev) GaniReverse.Apply(g);
                     body = GaniV2.Write(g);
                     // Re-quantising the pole is NOT an involution, so re-read rather than undo.
-                    if (mir) g = GaniV1.Read(file, off, len);
+                    if (mir) g = ReadClip(off, len);
                 }
 
                 // Keep the leading slash: NameResolver keys off "/Assets/", and the vendored
@@ -328,7 +388,7 @@ internal static class TranscodeCmd
             {
                 // Mirrored slots work on a FRESH read: re-quantising the pole is not an
                 // involution, so the shared source clip must not be left transformed.
-                var g = (mirrorOf[i] || reverseOf[i]) ? GaniV1.Read(file, srcAt[i], srcLen[i]) : srcGanis[i];
+                var g = (mirrorOf[i] || reverseOf[i]) ? ReadClip(srcAt[i], srcLen[i]) : srcGanis[i];
                 var pairs = mirrorOf[i] ? (rigPairs ?? GaniMirror.PairIndices(g, mirrorPairsOverride)) : null;
                 if (mirrorOf[i]) GaniMirror.Apply(g, mirrorAxisOf[i], pairs, frig, comp);
                 if (reverseOf[i]) GaniReverse.Apply(g);
@@ -431,7 +491,7 @@ internal static class TranscodeCmd
                 foreach (var twin in Partners(leaf))
                 {
                     if (!haveSrc.TryGetValue(twin, out int at2)) continue;
-                    var g2 = GaniV1.Read(file, srcAt[at2], srcLen[at2]);
+                    var g2 = ReadClip(srcAt[at2], srcLen[at2]);
                     if (g2 is null) continue;
                     byte[] body2 = null;
                     if (tpl is not null)
@@ -439,7 +499,7 @@ internal static class TranscodeCmd
                         GaniMirror.Apply(g2, mirrorAxis,
                             rigPairs ?? GaniMirror.PairIndices(g2, mirrorPairsOverride), frig, comp);
                         body2 = GaniV2.Write(g2);
-                        g2 = GaniV1.Read(file, srcAt[at2], srcLen[at2]);
+                        g2 = ReadClip(srcAt[at2], srcLen[at2]);
                     }
                     names.Add(slot.StartsWith('/') ? slot : "/" + slot);
                     nameKeys.Add(MtarGaniNames.Hash(slot, MtarGaniNames.NameMask));

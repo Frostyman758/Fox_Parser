@@ -121,6 +121,9 @@ public static class Cli
         if (args[0] == "mirror")
             return MirrorCmd.Run(args);
 
+        if (args[0] == "animmap")
+            return AnimMapCmd.Run(args);
+
         // `test` is a subcommand, not a file path — handle before file checks.
         //   test                  -> run everything
         //   test <tool>           -> run just that tool (fsop|fox|ftex)
