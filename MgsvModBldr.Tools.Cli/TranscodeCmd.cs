@@ -24,6 +24,7 @@ internal static class TranscodeCmd
         bool merge = false, over = false, noAdd = false;
         string addOnly = null;
         string graphPath = null;
+        var mapArgs = new List<string>();
         for (int i = 2; i < args.Length; i++)
         {
             if ((args[i] is "--template" or "-t") && i + 1 < args.Length) template = args[++i];
@@ -34,6 +35,7 @@ internal static class TranscodeCmd
             else if (args[i] == "--no-add") noAdd = true;
             else if (args[i] == "--add-only" && i + 1 < args.Length) addOnly = args[++i];
             else if (args[i] == "--graph" && i + 1 < args.Length) graphPath = args[++i];
+            else if (args[i] == "--map" && i + 1 < args.Length) mapArgs.Add(args[++i]);
         }
         if (!File.Exists(src)) { Console.Error.WriteLine($"FOXDIE: no such mtar: {src}"); return 2; }
         if (template is null || !File.Exists(template)) { Usage(); return 2; }
@@ -57,6 +59,45 @@ internal static class TranscodeCmd
         int count = (int)BitConverter.ToUInt32(file, 4);
         var dict = MtarGaniNames.LoadDictionary(
             Path.Combine(AppContext.BaseDirectory, "dict", "mtar_dictionary.txt"));
+
+        // --map: GZ name -> TPP name, for clips the two games spell differently (GZ's heli
+        // player set is snapsbh_*, TPP's is snaputh_*). Without it only identical names pair.
+        // Each --map is a pair given inline ("gz=tpp", comma-separated for several) or the
+        // path of a file holding one pair per line. Two clips do not need a file; a hundred do.
+        // Pairs separate on '=', "->" or whitespace, '#' comments. Either side may be a full
+        // path or a bare leaf; a leaf resolves against the TEMPLATE's own entries, so a mapped
+        // clip can only ever land on a slot that really exists. One GZ clip listed against
+        // several targets is written into each of them.
+        Dictionary<string, List<string>> renames = null;
+        if (mapArgs.Count > 0)
+        {
+            var mapLines = new List<string>();
+            foreach (var m in mapArgs)
+            {
+                if (m.Contains('=') || m.Contains("->")) mapLines.AddRange(m.Split(',', StringSplitOptions.RemoveEmptyEntries));
+                else if (File.Exists(m)) mapLines.AddRange(File.ReadAllLines(m));
+                else { Console.Error.WriteLine($"FOXDIE: --map is neither a pair nor a file: {m}"); return 2; }
+            }
+
+            var tplByLeaf = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var f in tpl.files) { var n = Norm(f.name); tplByLeaf.TryAdd(Leaf(n), n); }
+
+            renames = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+            foreach (var raw in mapLines)
+            {
+                var line = raw.Split('#')[0].Replace("->", " ").Replace('=', ' ').Trim();
+                if (line.Length == 0) continue;
+                var p = line.Split((char[])null, StringSplitOptions.RemoveEmptyEntries);
+                if (p.Length != 2) { Console.Error.WriteLine($"FOXDIE: map line needs two names: {raw}"); return 2; }
+                var to = Norm(p[1]);
+                if (!to.Contains('/') && !tplByLeaf.TryGetValue(to, out to))
+                { Console.Error.WriteLine($"FOXDIE: map target not in the template: {p[1]}"); return 2; }
+                var key = Norm(p[0]);
+                if (!renames.TryGetValue(key, out var list)) renames[key] = list = new List<string>();
+                if (!list.Contains(to, StringComparer.OrdinalIgnoreCase)) list.Add(to);
+            }
+        }
+        int renamed = 0;
 
         var names = new List<string>();
         var nameKeys = new List<ulong>();      // TPP-side name hash, for template lookups
@@ -84,16 +125,28 @@ internal static class TranscodeCmd
             if (!dict.TryGetValue(MtarGaniNames.NameHash(hash), out var path))
             { path = $"_unnamed/{hash:x16}"; unnamed++; }
 
-            // Keep the leading slash: NameResolver keys off "/Assets/", and the vendored
-            // Export/Import build their paths by concatenation, so it round-trips as-is.
-            var dictPath = path;
-            if (!path.StartsWith('/')) path = "/" + path;
-            names.Add(path);
-            nameKeys.Add(MtarGaniNames.Hash(dictPath, MtarGaniNames.NameMask));
-            bodies.Add(GaniV2.Write(g));
-            events.Add(g.Events);
-            motionPoints.Add(g.MotionPoints);
-            mpParents.Add(g.MotionPointParents);
+            // Renamed BEFORE anything else looks at the name, so the destination path, the
+            // template lookups and the pair/mirror guards all see the TPP clip it becomes.
+            // Full path first, then the leaf — GZ clip names are unique across the archive.
+            var targets = new List<string> { path };
+            if (renames is not null
+                && (renames.TryGetValue(Norm(path), out var mapped)
+                 || renames.TryGetValue(Leaf(Norm(path)), out mapped)))
+            { targets = mapped; renamed += mapped.Count; }
+
+            var body = GaniV2.Write(g);
+            foreach (var target in targets)
+            {
+                // Keep the leading slash: NameResolver keys off "/Assets/", and the vendored
+                // Export/Import build their paths by concatenation, so it round-trips as-is.
+                var dictPath = target;
+                names.Add(target.StartsWith('/') ? target : "/" + target);
+                nameKeys.Add(MtarGaniNames.Hash(dictPath, MtarGaniNames.NameMask));
+                bodies.Add(body);
+                events.Add(g.Events);
+                motionPoints.Add(g.MotionPoints);
+                mpParents.Add(g.MotionPointParents);
+            }
         }
         if (names.Count == 0) { Console.Error.WriteLine("FOXDIE: no ganis decoded"); return 2; }
 
@@ -309,6 +362,7 @@ internal static class TranscodeCmd
         if (merge) Console.WriteLine($"  template ganis kept as-is : {kept:N0}");
         Console.WriteLine($"  added from GZ             : {added:N0}");
         if (replaced > 0) Console.WriteLine($"  replaced with GZ version  : {replaced:N0}");
+        if (renamed > 0) Console.WriteLine($"  renamed via --map         : {renamed:N0}");
         if (merge && !over && names.Count - added > 0)
             Console.WriteLine($"  GZ versions NOT used (already present; pass --override): {names.Count - added:N0}");
         if (syncKept > 0) Console.WriteLine($"  kept TPP clip (GZ has no foot-sync): {syncKept:N0}");
@@ -356,6 +410,8 @@ internal static class TranscodeCmd
         return s.TrimStart('/');
     }
 
+    private static string Leaf(string s) => s[(s.LastIndexOf('/') + 1)..];
+
     private static string Short(string s) => s.Length <= 96 ? s : s[..96] + "…";
 
     private static byte[] ReadOrEmpty(string p) => File.Exists(p) ? File.ReadAllBytes(p) : [];
@@ -380,5 +436,7 @@ internal static class TranscodeCmd
         Console.Error.WriteLine("  --no-add     replace only; never add a clip the template lacks");
         Console.Error.WriteLine("  --add-only <file>  only add clips whose path is listed");
         Console.Error.WriteLine("  --graph <mog>      the motion graph, so clips it plays MIRRORED are left alone");
+        Console.Error.WriteLine("  --map <gz>=<tpp>   rename a source clip onto a template slot; repeatable,");
+        Console.Error.WriteLine("                     comma-separates, and takes a file of pairs instead");
     }
 }
