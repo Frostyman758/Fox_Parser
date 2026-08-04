@@ -18,13 +18,14 @@ internal static class StreamCmd
     {
         var rest = new List<string>();
         string outFile = null, gameDir = null, listFilter = null;
-        bool list = false;
+        bool list = false, virt = false;
         for (int i = 1; i < args.Length; i++)
         {
             switch (args[i])
             {
                 case "-o" or "--out" when i + 1 < args.Length: outFile = args[++i]; break;
                 case "--game" when i + 1 < args.Length: gameDir = args[++i]; break;
+                case "--virtual" or "-v": virt = true; break;
                 case "--list" or "-l":
                     list = true;
                     if (i + 1 < args.Length && !args[i + 1].StartsWith("-")) listFilter = args[++i];
@@ -48,7 +49,7 @@ internal static class StreamCmd
             }
             if (list) return List(archive, listFilter);
             if (rest.Count < 2) { Usage(); return 2; }
-            return One(archive, rest[1], outFile);
+            return One(archive, rest[1], outFile, virt);
         }
         catch (Exception ex)
         {
@@ -71,13 +72,29 @@ internal static class StreamCmd
         return 0;
     }
 
-    private static int One(string archive, string target, string outFile)
+    private static int One(string archive, string target, string outFile, bool virt)
     {
-        byte[] data = ulong.TryParse(target, System.Globalization.NumberStyles.HexNumber, null, out var hash) && target.Length == 16
-            ? ArchiveStream.Read(archive, hash)
-            : ArchiveStream.Read(archive, target);
-        return WriteOut(data, target, outFile);
+        if (ulong.TryParse(target, System.Globalization.NumberStyles.HexNumber, null, out var hash) && target.Length == 16)
+            return WriteOut(ArchiveStream.Read(archive, hash), target, outFile);
+
+        // Virtual: the caller gives the GAME path and doesn't need to know which
+        // container holds it — resolve through the index, then read the real route.
+        if (virt)
+        {
+            var want = target.Replace('\\', '/').TrimStart('/');
+            foreach (var it in VirtualListing.Build(archive).Items)
+                if (string.Equals(it.VirtualPath, want, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (it.InPack) Console.Error.WriteLine($"  in {it.Pack}");
+                    return WriteOut(ArchiveStream.Read(archive, it.PhysicalPath), target, outFile);
+                }
+            Console.Error.WriteLine($"FOXDIE: {target} is not in {Path.GetFileName(archive)} (virtual).");
+            return 2;
+        }
+        return WriteOut(ArchiveStream.Read(archive, target), target, outFile);
     }
+
+
 
     private static int FromGame(string gameDir, List<string> rest, string outFile)
     {
@@ -102,7 +119,8 @@ internal static class StreamCmd
     private static void Usage()
     {
         Console.Error.WriteLine("usage: stream <archive.dat|.g0s> <path-or-hash> [-o <outfile>]");
-        Console.Error.WriteLine("       stream <archive.dat|.g0s> --list [substring]");
+        Console.Error.WriteLine("       stream <archive> --list [substring]        physical layout");
+        Console.Error.WriteLine("       stream <archive> --virtual <gamePath>      read by GAME path (see `index`)");
         Console.Error.WriteLine("       stream --game <gameDir> <path> [-o <outfile>]");
     }
 }

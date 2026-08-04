@@ -13,6 +13,7 @@
   <Project Path="MgsvModBldr.Tools.Translation/MgsvModBldr.Tools.Translation.csproj" />
   <Project Path="MgsvModBldr.Tools.Twpf/MgsvModBldr.Tools.Twpf.csproj" />
   <Project Path="MgsvModBldr.Tools.Mtar/MgsvModBldr.Tools.Mtar.csproj" />
+  <Project Path="MgsvModBldr.Tools.MotionGraph/MgsvModBldr.Tools.MotionGraph.csproj" />
   <Project Path="MgsvModBldr.Tools.Spch/MgsvModBldr.Tools.Spch.csproj" />
   <Project Path="MgsvModBldr.Tools.Tcvp/MgsvModBldr.Tools.Tcvp.csproj" />
   <Project Path="MgsvModBldr.Tools.Rdf/MgsvModBldr.Tools.Rdf.csproj" />
@@ -21,6 +22,7 @@
   <Project Path="MgsvModBldr.Tools.Sbp/MgsvModBldr.Tools.Sbp.csproj" />
   <Project Path="MgsvModBldr.Tools.Stp/MgsvModBldr.Tools.Stp.csproj" />
   <Project Path="MgsvModBldr.Tools.G0s/MgsvModBldr.Tools.G0s.csproj" />
+  <Project Path="MgsvModBldr.Tools.Index/MgsvModBldr.Tools.Index.csproj" />
   <Project Path="MgsvModBldr.Tools.Streaming/MgsvModBldr.Tools.Streaming.csproj" />
   <Project Path="MgsvModBldr.Tools.Browse/MgsvModBldr.Tools.Browse.csproj" />
   <Project Path="MgsvModBldr.Tools.Ui/MgsvModBldr.Tools.Ui.csproj" />

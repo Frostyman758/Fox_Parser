@@ -16,5 +16,6 @@
     <ProjectReference Include="..\MgsvModBldr.Tools.Qar\MgsvModBldr.Tools.Qar.csproj" />
     <ProjectReference Include="..\MgsvModBldr.Tools.Fpk\MgsvModBldr.Tools.Fpk.csproj" />
     <ProjectReference Include="..\MgsvModBldr.Tools.G0s\MgsvModBldr.Tools.G0s.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.Index\MgsvModBldr.Tools.Index.csproj" />
   </ItemGroup>
 </Project>

@@ -24,6 +24,11 @@
     <None Include="..\qar_dictionary.txt" Link="dict\qar_dictionary.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <!-- GZ fpk entry paths are stored as MD5, not strings, so a GZ pack's contents
+         are unnameable without this one. -->
+    <None Include="..\fpk_dictionary.txt" Link="dict\fpk_dictionary.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="..\gzs_dictionary.txt" Link="dict\gzs_dictionary.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -31,6 +36,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="..\lang_dictionary.txt" Link="dict\lang_dictionary.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <!-- MTP_* motion-point names, harvested from GZ archives via the ganis verb.
+         The engine has no reader for GZ's name table, so these are recovered as literal
+         strings and confirmed by forward-hashing each one. -->
+    <None Include="..\motionpoint_dictionary.txt" Link="dict\motionpoint_dictionary.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="..\mtar_dictionary.txt" Link="dict\mtar_dictionary.txt">

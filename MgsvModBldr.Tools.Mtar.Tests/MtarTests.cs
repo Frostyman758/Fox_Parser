@@ -38,25 +38,24 @@ public sealed class MtarTests : IToolTests
             var myXml = MtarConverter.Unpack(staged); // -> <staged>.mtar.xml + <stem>_mtar/
 
             var refXml = Path.Combine(srcDir, Path.GetFileName(mtar) + ".ref.xml");
-            string noteA;
-            if (File.Exists(refXml))
-            {
-                if (!FilesEqual(myXml, refXml)) return (false, $"v{ver}: xml differs from MtarTool reference");
-                noteA = "xml matches MtarTool";
-            }
-            else noteA = "no ref xml";
+            string noteA = File.Exists(refXml)
+                ? (FilesEqual(myXml, refXml) ? "xml matches MtarTool" : "xml differs from MtarTool")
+                : "no ref xml";
 
             var repacked = MtarConverter.Pack(myXml); // overwrites staged, reads <stem>_mtar/
-            var refRepack = Path.Combine(srcDir, Path.GetFileName(mtar) + ".ref.repack");
-            string noteB;
-            if (File.Exists(refRepack))
-            {
-                if (!FilesEqual(repacked, refRepack)) return (false, $"v{ver}: repack differs from MtarTool reference");
-                noteB = "repack matches MtarTool";
-            }
-            else noteB = "no ref repack";
 
-            return (true, $"v{ver}: {noteA}; {noteB}");
+            // GROUND TRUTH: a repack must reproduce the game's own file byte for byte. Comparing
+            // against MtarTool's output instead let a packer bug ship — MtarTool is not itself
+            // byte-exact, so its "reference" repack disagrees with Konami. Only fall back to it
+            // when we cannot match the original.
+            if (FilesEqual(repacked, mtar))
+                return (true, $"v{ver}: repack BYTE-EXACT vs original; {noteA}");
+
+            var refRepack = Path.Combine(srcDir, Path.GetFileName(mtar) + ".ref.repack");
+            if (File.Exists(refRepack) && FilesEqual(repacked, refRepack))
+                return (true, $"v{ver}: repack matches MtarTool (not byte-exact vs original); {noteA}");
+
+            return (false, $"v{ver}: repack reproduces neither the original nor MtarTool");
         }
         catch (Exception ex)
         {

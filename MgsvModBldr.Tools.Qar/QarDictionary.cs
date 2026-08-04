@@ -52,7 +52,7 @@ public sealed class QarDictionary
         if (_baseByHash.TryGetValue(pathHash & GameHash.PATH_CODE_BASE_MASK, out var packed))
         {
             found = true;
-            var basePath = System.Text.Encoding.UTF8.GetString(_blob, (int)(packed >> 24), (int)(packed & 0xFFFFFF));
+            var basePath = PathOf(packed);
             uint extCode = GameHash.ExtCodeOf(pathHash);
             if (extCode != 0 && _extByCode.TryGetValue(extCode, out var ext))
                 return basePath + ext;
@@ -61,6 +61,19 @@ public sealed class QarDictionary
         found = false;
         return $"{pathHash:x}";
     }
+
+    // Every retained path, as (token, text). The string is transient — keep the
+    // token and call PathOf to get it back. Lets a second index (GZ's 48-bit ids
+    // hash the same paths through a different function) key the SAME blob instead
+    // of holding its own ~27 MB copy of the text.
+    public void ForEachPath(Action<long, string> visit)
+    {
+        foreach (var packed in _baseByHash.Values) visit(packed, PathOf(packed));
+    }
+
+    // Materialise the path a ForEachPath token points at.
+    public string PathOf(long token) =>
+        System.Text.Encoding.UTF8.GetString(_blob, (int)(token >> 24), (int)(token & 0xFFFFFF));
 
     private static Dictionary<uint, string>? _extMap;
 

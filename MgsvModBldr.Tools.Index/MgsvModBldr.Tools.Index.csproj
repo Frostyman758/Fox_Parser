@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <RootNamespace>MgsvModBldr.Tools.Index</RootNamespace>
+    <AssemblyName>MgsvModBldr.Tools.Index</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MgsvModBldr.Tools.GameHashing\MgsvModBldr.Tools.GameHashing.csproj" />
+  </ItemGroup>
+  <!-- Container INDEXES, read without their payloads. Every reader takes a byte-range
+       delegate rather than an archive type, so the same code indexes a container
+       sitting in a .dat, in a .g0s, nested inside another pack, or loose on disk.
+       Deliberately depends on no archive library: the caller supplies the bytes
+       (Tools.Streaming's prefix/range readers do that for QAR and g0s). -->
+</Project>

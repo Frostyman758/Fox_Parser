@@ -8,14 +8,19 @@ namespace MgsvModBldr.Tools.Browse;
 // the verified MtarFile/MtarFile2 readers to parse the index, then records
 // each item's on-disk region — so gani/trk/chnk/exchnk payloads are pulled on
 // demand instead of materialised up front. Mirrors MtarBrowse.Read
-// item-for-item (same names, same order). The only block whose size needs a
-// scan is the rare .enchnk, so that tiny block is read once at open.
-// Byte-for-byte identical — verified by the test.
+// item-for-item (same order). The only block whose size needs a scan is the
+// rare .enchnk, so that tiny block is read once at open.
+//
+// Names differ from MtarBrowse on purpose: this is the BROWSE listing, so
+// entries are named from the shipped dictionaries (see Stem) and shown as bare
+// leaves. MtarBrowse keeps NameResolver's key format because unpack/repack has
+// to reconstruct the hash from the name.
 internal static class LazyMtarReader
 {
     internal sealed class Item
     {
         public string  Name = "";
+        public ulong   Hash;    // the gani's asset id (0 for .trk/.chnk)
         public long    Offset;
         public int     Size;
         public byte[]? Eager;   // set only for .enchnk (size requires a scan)
@@ -30,27 +35,55 @@ internal static class LazyMtarReader
             var f = new MtarFile();
             s.Position = 0; f.Read(s);
             foreach (var g in f.files)        // g.name already ends in ".gani"
-                items.Add(new Item { Name = g.name, Offset = g.offset, Size = g.size });
+                items.Add(new Item { Name = Stem(g.hash, g.name) + ".gani", Hash = g.hash, Offset = g.offset, Size = g.size });
         }
         else
         {
             var f = new MtarFile2();
             s.Position = 0; f.Read(s);
-            items.Add(new Item { Name = "track.trk", Offset = f.mtarTrack.offset, Size = (int)(f.mtarTrack.length + 0x10) });
-            if (f.mtarTrack.chunkOffset > 0)
-                items.Add(new Item { Name = "chunk.chnk", Offset = f.mtarChunk.offset, Size = f.mtarChunk.size });
+            // CommonInfo is decoded, not carried — same as MtarBrowse, surface the
+            // track node's rebuilt bytes rather than a file region.
+            var trk = f.TrackNodeBytes();
+            if (trk.Length > 0) items.Add(new Item { Name = "track.trk", Eager = trk });
 
             foreach (var g in f.files)
             {
-                var stem = g.name;            // resolved path or hash (no extension)
-                items.Add(new Item { Name = stem + ".gani", Offset = g.offset, Size = g.size });
-                if (g.exChunkSize != 0)       // exchnk sits right after the gani data
-                    items.Add(new Item { Name = stem + ".exchnk", Offset = (long)g.offset + g.size, Size = g.exChunkSize });
+                var stem = Stem(g.hash, g.name);
+                items.Add(new Item { Name = stem + ".gani", Hash = g.hash, Offset = g.offset, Size = g.size });
+                if (g.motionPointsSize != 0)  // motion-point tracks sit right after the gani data
+                    items.Add(new Item { Name = stem + ".mtp", Hash = g.hash, Offset = (long)g.offset + g.size, Size = g.motionPointsSize });
                 if (g.endChunkOffset != 0)    // size needs a sentinel scan -> read its (tiny) block now
-                    items.Add(new Item { Name = stem + ".enchnk", Eager = g.ReadEndChunkData(s) });
+                    items.Add(new Item { Name = stem + ".enchnk", Hash = g.hash, Eager = g.ReadEndChunkData(s) });
             }
         }
         return items;
+    }
+
+    // The entry hash IS the animation's asset id, so the shipped dictionaries name
+    // it: TPP through qar_dictionary (PathCode64), GZ through GzHashNames (48-bit).
+    // Leaf only — an mtar lists flat, and a full "/Assets/…" path would bury a
+    // 2,400-clip archive under six folders. Falls back to the reader's own name.
+    private static string Stem(ulong hash, string fallback)
+    {
+        if (hash != 0)
+        {
+            if (GzHashNames.ResolveLeaf(hash) is { } gz) return StripExtension(gz);
+            var dict = QarNameDictionary.Get();
+            if (dict is not null)
+            {
+                var full = dict.Resolve(hash, out bool found);
+                if (found) return StripExtension(full[(full.LastIndexOfAny(Seps) + 1)..]);
+            }
+        }
+        return StripExtension(fallback);
+    }
+
+    private static readonly char[] Seps = { '/', '\\' };
+
+    private static string StripExtension(string name)
+    {
+        int dot = name.LastIndexOf('.');
+        return dot > 0 ? name[..dot] : name;
     }
 
     // 1 = type 1 (first entry's data magic 0xBFCA2D2), else 2. .mtar has no header.

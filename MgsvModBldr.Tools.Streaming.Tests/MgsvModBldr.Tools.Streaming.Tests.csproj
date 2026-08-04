@@ -8,6 +8,8 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\MgsvModBldr.Tools.Streaming\MgsvModBldr.Tools.Streaming.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.Index\MgsvModBldr.Tools.Index.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.Pftxs\MgsvModBldr.Tools.Pftxs.csproj" />
     <ProjectReference Include="..\MgsvModBldr.Tools.Testing\MgsvModBldr.Tools.Testing.csproj" />
   </ItemGroup>
 </Project>

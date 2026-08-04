@@ -21,6 +21,7 @@
     <ProjectReference Include="..\MgsvModBldr.Tools.Translation\MgsvModBldr.Tools.Translation.csproj" />
     <ProjectReference Include="..\MgsvModBldr.Tools.Twpf\MgsvModBldr.Tools.Twpf.csproj" />
     <ProjectReference Include="..\MgsvModBldr.Tools.Mtar\MgsvModBldr.Tools.Mtar.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.MotionGraph\MgsvModBldr.Tools.MotionGraph.csproj" />
     <ProjectReference Include="..\MgsvModBldr.Tools.Spch\MgsvModBldr.Tools.Spch.csproj" />
     <ProjectReference Include="..\MgsvModBldr.Tools.Tcvp\MgsvModBldr.Tools.Tcvp.csproj" />
     <ProjectReference Include="..\MgsvModBldr.Tools.Rdf\MgsvModBldr.Tools.Rdf.csproj" />
@@ -45,6 +46,7 @@
     <ProjectReference Include="..\MgsvModBldr.Tools.Translation.Tests\MgsvModBldr.Tools.Translation.Tests.csproj" />
     <ProjectReference Include="..\MgsvModBldr.Tools.Twpf.Tests\MgsvModBldr.Tools.Twpf.Tests.csproj" />
     <ProjectReference Include="..\MgsvModBldr.Tools.Mtar.Tests\MgsvModBldr.Tools.Mtar.Tests.csproj" />
+    <ProjectReference Include="..\MgsvModBldr.Tools.MotionGraph.Tests\MgsvModBldr.Tools.MotionGraph.Tests.csproj" />
     <ProjectReference Include="..\MgsvModBldr.Tools.Spch.Tests\MgsvModBldr.Tools.Spch.Tests.csproj" />
     <ProjectReference Include="..\MgsvModBldr.Tools.Tcvp.Tests\MgsvModBldr.Tools.Tcvp.Tests.csproj" />
     <ProjectReference Include="..\MgsvModBldr.Tools.Rdf.Tests\MgsvModBldr.Tools.Rdf.Tests.csproj" />

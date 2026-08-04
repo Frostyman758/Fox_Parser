@@ -109,12 +109,27 @@ public static class ArchiveStream
         return qr.ReadDecoded(e);
     }
 
-    /// <summary>Pull one inner file out of an in-memory fpk/fpkd.</summary>
+    /// <summary>Pull one inner file out of an in-memory fpk/fpkd (TPP or GZ).</summary>
     public static byte[] FromPack(byte[] packBytes, string interior)
     {
+        string want = Norm(interior);
+
+        // GZ packs carry the "ste" platform tag and a different reader; the TPP
+        // FpkFile rejects them outright ("unknown fpk(d) magic").
+        if (MgsvModBldr.Tools.Fpk.Gz.GzFpkFile.IsGzMagic(packBytes.AsSpan(0, Math.Min(packBytes.Length, 10))))
+        {
+            using var gms = new MemoryStream(packBytes, writable: false);
+            var gz = MgsvModBldr.Tools.Fpk.Gz.GzFpkFile.Read(gms);
+            foreach (var e in gz.Entries)
+            {
+                var have = Norm(e.FilePath);
+                if (have == want || have.EndsWith("/" + want, StringComparison.OrdinalIgnoreCase)) return e.Data;
+            }
+            throw new FileNotFoundException($"'{interior}' not inside the GZ pack");
+        }
+
         var fpk = new FpkFile();
         using (var ms = new MemoryStream(packBytes, writable: false)) fpk.Read(ms);
-        string want = Norm(interior);
         foreach (var e in fpk.Entries)
         {
             var have = Norm(e.FilePath.Data);

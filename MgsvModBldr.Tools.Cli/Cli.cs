@@ -8,6 +8,7 @@ using MgsvModBldr.Tools.Qar;
 using MgsvModBldr.Tools.Translation;
 using MgsvModBldr.Tools.Twpf;
 using MgsvModBldr.Tools.Mtar;
+using MgsvModBldr.Tools.MotionGraph;
 using MgsvModBldr.Tools.Spch;
 using MgsvModBldr.Tools.Tcvp;
 using MgsvModBldr.Tools.Rdf;
@@ -102,6 +103,21 @@ public static class Cli
         if (args[0] == "stream")
             return StreamCmd.Run(args);
 
+        // index / search: the archive laid out by GAME path, as a tree.
+        if (args[0] is "index" or "search" or "find")
+            return IndexCmd.Run(args);
+
+        // ganis: name the animations inside an mtar (TPP or GZ).
+        if (args[0] == "ganis")
+            return GaniCmd.Run(args);
+
+        if (args[0] == "transcode")
+            return TranscodeCmd.Run(args);
+
+        // mog: inspect / compare / repath a motion graph.
+        if (args[0] == "mog")
+            return MogCmd.Run(args);
+
         // `test` is a subcommand, not a file path — handle before file checks.
         //   test                  -> run everything
         //   test <tool>           -> run just that tool (fsop|fox|ftex)
@@ -127,7 +143,7 @@ public static class Cli
     {
         "hash", "foxhash", "unhash", "lookup", "pathcode", "stringid",
         "buildmgsv", "update-dicts", "updatedicts", "update-dictionaries",
-        "gzui", "stream", "test",
+        "gzui", "stream", "index", "search", "find", "ganis", "transcode", "mog", "test",
     };
 
     private static int ExecuteFileOp(string[] args, LogoMode logo)
@@ -258,6 +274,7 @@ public static class Cli
             if (Has(".ffnt.xml")) return "ffnt";
             if (Has(".lng.xml") || Has(".lng2.xml")) return "lng";
             if (Has(".mtar.xml")) return "mtar";
+            if (Has(".mog.xml")) return "mog";
             if (Has(".spch.xml")) return "spch";
             if (Has(".tcvp.xml")) return "tcvp";
             if (Has(".rdf.xml")) return "rdf";
@@ -276,7 +293,7 @@ public static class Cli
         return ext switch
         {
             ".subp" => "subp", ".twpf" => "twpf", ".ffnt" => "ffnt",
-            ".lng" or ".lng2" => "lng", ".mtar" => "mtar", ".spch" => "spch",
+            ".lng" or ".lng2" => "lng", ".mtar" => "mtar", ".mog" => "mog", ".spch" => "spch",
             ".tcvp" => "tcvp", ".rdf" => "rdf", ".fv2" => "fv2",
             ".fxc" or ".hlsl" => "hlsl", ".fsop" => "fsop",
             ".ftex" or ".dds" or ".ftexs" => "ftex",
@@ -304,6 +321,7 @@ public static class Cli
         Console.WriteLine("  .lng / .lng2  language             <-> .lng.xml");
         Console.WriteLine("  .twpf         weather params       <-> .twpf.xml");
         Console.WriteLine("  .mtar         motion archive       <-> .mtar.xml + folder");
+        Console.WriteLine("  .mog          motion graph         <-> .mog.xml");
         Console.WriteLine("  .spch         speech               <-> .spch.xml");
         Console.WriteLine("  .tcvp         cover-point locators <-> .tcvp.xml");
         Console.WriteLine("  .rdf          radio dialogue       <-> .rdf.xml");
@@ -319,6 +337,8 @@ public static class Cli
         Console.WriteLine("  pathcode | stringid <str...>   single-variant forward hash");
         Console.WriteLine("  update-dicts [-repo r]         refresh dict/ from mgsv-lookup-strings");
         Console.WriteLine("  stream <archive> <path|hash>   extract ONE entry, no unpack (--list, --game <dir>)");
+        Console.WriteLine("  index  <archive> [substring]   archive as a GAME-path tree (packs flattened)");
+        Console.WriteLine("  search <archive> <pattern>     find files by game path (* ? globs)");
         Console.WriteLine("  test [<tool>] [--harvest]      regression suite");
         Console.WriteLine("  buildmgsv <srcDir> <out.mgsv>  full mod build pipeline");
     }
@@ -352,6 +372,23 @@ public static class Cli
             { var p = FfntConverter.Pack(input); Console.WriteLine($"Packed    {input} -> {p}"); return 0; }
             if (input.EndsWith(".lng.xml", StringComparison.OrdinalIgnoreCase) || input.EndsWith(".lng2.xml", StringComparison.OrdinalIgnoreCase))
             { var p = LangConverter.Pack(input); Console.WriteLine($"Packed    {input} -> {p}"); return 0; }
+            if (input.EndsWith(".mog.xml", StringComparison.OrdinalIgnoreCase))
+            {
+                var outMog = input[..^4];
+                var built = MogBuilder.Build(MogXml.Read(input));
+                // The engine validates almost nothing, so a broken graph loads and silently
+                // yields no pose. Check before writing rather than in-game.
+                var vr = MogValidate.Run(built);
+                if (!vr.Ok)
+                {
+                    Console.Error.WriteLine($"FOXDIE: built mog fails {vr.Errors.Count} invariant check(s):");
+                    foreach (var err in vr.Errors.Take(15)) Console.Error.WriteLine($"  {err}");
+                    return 1;
+                }
+                File.WriteAllBytes(outMog, built);
+                Console.WriteLine($"Packed    {input} -> {outMog}   (invariants ok)");
+                return 0;
+            }
             if (input.EndsWith(".mtar.xml", StringComparison.OrdinalIgnoreCase))
             { var p = MtarConverter.Pack(input); Console.WriteLine($"Packed    {input} -> {p}"); return 0; }
             if (input.EndsWith(".spch.xml", StringComparison.OrdinalIgnoreCase))
@@ -369,6 +406,14 @@ public static class Cli
         if (ext == ".twpf") { var p = TwpfConverter.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }
         if (ext == ".ffnt") { var p = FfntConverter.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }
         if (ext == ".lng" || ext == ".lng2") { var p = LangConverter.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }
+        if (ext == ".mog")
+        {
+            var raw = File.ReadAllBytes(input);
+            var xml = input + ".xml";
+            MogXml.Write(MogFile.Read(raw), MogPathPool.Find(raw), xml);
+            Console.WriteLine($"Unpacked  {input} -> {xml}");
+            return 0;
+        }
         if (ext == ".mtar") { var p = MtarConverter.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }
         if (ext == ".spch") { var p = SpchConverter.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }
         if (ext == ".tcvp") { var p = TcvpConverter.Unpack(input); Console.WriteLine($"Unpacked  {input} -> {p}"); return 0; }

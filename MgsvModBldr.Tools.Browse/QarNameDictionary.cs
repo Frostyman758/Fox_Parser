@@ -56,6 +56,7 @@ public static class QarNameDictionary
     {
         lock (_lock) { _tried = false; _dict = null; }       // qar (ours)
         QarDictionary.DropCache();                            // its own static cache too
+        GzHashNames.Clear();                                  // GZ index over qar's blob
         G0sHash.DictionaryDirectory = G0sHash.DictionaryDirectory;          // gzs
         FpkDictionary.DictionaryDirectory = FpkDictionary.DictionaryDirectory; // fpk
     }

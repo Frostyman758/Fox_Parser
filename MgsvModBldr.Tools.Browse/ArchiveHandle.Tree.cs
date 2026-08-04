@@ -129,12 +129,12 @@ public sealed partial class ArchiveHandle
         {
             if (e.Eager is not null)       // .enchnk — already in memory (tiny)
             {
-                var leaf = AddPath(e.Name, (ulong)e.Eager.LongLength, 0);
+                var leaf = AddPath(e.Name, (ulong)e.Eager.LongLength, e.Hash);
                 leaf.Blob = e.Eager;
             }
             else
             {
-                var leaf = AddPath(e.Name, (ulong)e.Size, 0);
+                var leaf = AddPath(e.Name, (ulong)e.Size, e.Hash);
                 leaf.Lazy = new LazyBlob { Offset = e.Offset, Length = e.Size, Decode = LazyBlob.Raw };
             }
         }

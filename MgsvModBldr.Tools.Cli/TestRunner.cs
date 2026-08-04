@@ -10,6 +10,7 @@ using MgsvModBldr.Tools.Pftxs.Tests;
 using MgsvModBldr.Tools.Translation.Tests;
 using MgsvModBldr.Tools.Twpf.Tests;
 using MgsvModBldr.Tools.Mtar.Tests;
+using MgsvModBldr.Tools.MotionGraph.Tests;
 using MgsvModBldr.Tools.Spch.Tests;
 using MgsvModBldr.Tools.Tcvp.Tests;
 using MgsvModBldr.Tools.Rdf.Tests;
@@ -39,6 +40,7 @@ public static class TestRunner
         new LangTests(),
         new TwpfTests(),
         new MtarTests(),
+        new MogTests(),
         new SpchTests(),
         new TcvpTests(),
         new RdfTests(),

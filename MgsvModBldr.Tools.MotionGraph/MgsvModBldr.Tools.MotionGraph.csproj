@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <RootNamespace>MgsvModBldr.Tools.MotionGraph</RootNamespace>
+    <AssemblyName>MgsvModBldr.Tools.MotionGraph</AssemblyName>
+  </PropertyGroup>
+  <!-- FOXMOTIONGRAPH (.mog) reader. Decoded from the TPP dev decompile and checked
+       against TPP's and GZ's player graphs; see MOG_FORMAT.md. Parsing is read-only
+       over the original bytes, so anything still undecoded survives a round trip. -->
+</Project>

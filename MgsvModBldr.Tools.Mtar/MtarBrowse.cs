@@ -4,7 +4,7 @@
 // MtarFile/MtarFile2 readers (so the chunk-size scan logic is reused verbatim).
 //
 //   v1 -> a .gani per entry
-//   v2 -> a .trk, an optional .chnk, and per gani a .gani (+ optional .exchnk /
+//   v2 -> a .trk, an optional .chnk, and per gani a .gani (+ optional .mtp /
 //         .enchnk). Names resolve via NameResolver (hash hex when no
 //         mtar_dictionary.txt is present).
 using System.Buffers.Binary;
@@ -36,16 +36,17 @@ public static class MtarBrowse
         {
             var f = new MtarFile2();
             f.Read(s);
-            items.Add(new MtarItem { Name = "track.trk", Data = f.mtarTrack.ReadData(s) });
-            if (f.mtarTrack.chunkOffset > 0)
-                items.Add(new MtarItem { Name = "chunk.chnk", Data = f.mtarChunk.ReadData(s) });
+            // CommonInfo is decoded, not carried — surface the track node's bytes for callers
+            // that still want the raw layout to compare against.
+            var trkBytes = f.TrackNodeBytes();
+            if (trkBytes.Length > 0) items.Add(new MtarItem { Name = "track.trk", Data = trkBytes });
 
             foreach (var g in f.files)
             {
                 var stem = g.name;                            // resolved path or hash (no extension)
                 items.Add(new MtarItem { Name = stem + ".gani", Data = g.ReadData(s) });
-                if (g.exChunkSize != 0)
-                    items.Add(new MtarItem { Name = stem + ".exchnk", Data = g.ReadExChunkData(s) });
+                if (g.motionPointsSize != 0)
+                    items.Add(new MtarItem { Name = stem + ".mtp", Data = g.ReadMotionPointData(s) });
                 if (g.endChunkOffset != 0)
                     items.Add(new MtarItem { Name = stem + ".enchnk", Data = g.ReadEndChunkData(s) });
             }
