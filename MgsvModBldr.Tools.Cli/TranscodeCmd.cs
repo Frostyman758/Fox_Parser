@@ -106,6 +106,7 @@ internal static class TranscodeCmd
         MgsvModBldr.Tools.Mtar.Mtar.MtarFile2 v2Src = null;
         List<byte[]> v2Bodies = null, v2Events = null, v2Motion = null;
         var v2MpBone = new Dictionary<uint, uint>();
+        int mpDropped = 0;
         if (MtarConverter.GetMtarType(src) != 1)
         {
             v2Src = new MgsvModBldr.Tools.Mtar.Mtar.MtarFile2();
@@ -120,7 +121,11 @@ internal static class TranscodeCmd
                 v2Bodies.Add(f.ReadData(fs));
                 fs.Position = 0;
                 v2Events.Add(f.endChunkSize > 0 ? f.ReadEndChunkData(fs) : Array.Empty<byte>());
-                fs.Position = 0;
+                // ReadMotionPointData does NOT seek — it reads from wherever the cursor is,
+                // expecting to follow ReadData. Seeking to 0 first fed it the FILE HEADER and
+                // wrote 46 corrupt .mtp payloads that crashed the game (see the note below).
+                // Position it explicitly rather than relying on call order.
+                fs.Position = f.offset + f.size;
                 v2Motion.Add(f.motionPointsSize > 0 ? f.ReadMotionPointData(fs) : Array.Empty<byte>());
             }
             // v1 reads each motion point's parent bone out of the clip; a v2 archive declares
@@ -140,23 +145,37 @@ internal static class TranscodeCmd
             var g2 = GaniV2Read.Read(v2Bodies[at], v2Src.trackInfo, v2Src.trackInfo.frameRate);
             if (g2 is null) return null;
             g2.Events = v2Events[at];
-            // Motion points travel too, so a slot that carries root trajectory can be replaced
-            // rather than skipped. The .mtp is `u32 unitCount | 0x10 pad | unitCount x u32
-            // offset`, each offset pointing at that unit's MTP name hash.
+            // Motion points travel too, so a slot carrying root trajectory can be replaced
+            // rather than skipped. A .mtp is a TrackHeader, the same shape as a .trk:
+            //   u32 unitCount | u32 trackCount | u32 flags | u32 frameCount | u32 frameRate
+            //   unitCount x u32 unitOffset (from 0x14, payload-relative)
+            // and each unit record is `u32 mtpName | u8 segCount@+4 | 8-byte segments@+8`.
+            // fox::anim::TrackControl::GetTrackControlSize walks exactly that and dereferences
+            // the segment record WITHOUT A NULL CHECK, so a malformed payload is not a glitch —
+            // it is an instant AV. That is what the 04/08/2026 crash was, and the cause was
+            // reading the payload from the wrong file position, not the format.
             var mp = v2Motion[at];
+            var why = MotionPointCheck.Why(mp);
+            if (why is not null)
+            {
+                // Drop rather than ship: with no motion points the target-side guard keeps the
+                // template's clip, which costs coverage. Shipping a bad one costs the process.
+                Console.Error.WriteLine($"  motion points DROPPED for source clip {at}: {why}");
+                mpDropped++;
+                mp = Array.Empty<byte>();
+            }
             if (mp.Length >= 0x14)
             {
                 g2.MotionPoints = mp;
                 int mpUnits = BitConverter.ToInt32(mp, 0);
-                for (int k = 0; k < mpUnits; k++)
-                {
-                    int slot = 0x14 + k * 4;
-                    if (slot + 4 > mp.Length) break;
-                    uint mo = BitConverter.ToUInt32(mp, slot);
-                    if (mo == 0 || mo + 4 > mp.Length) continue;
-                    uint mtp = BitConverter.ToUInt32(mp, (int)mo);
-                    if (v2MpBone.TryGetValue(mtp, out uint bone)) g2.MotionPointParents.Add((mtp, bone));
-                }
+                if (mpUnits > 0 && 0x14 + mpUnits * 4 <= mp.Length)
+                    for (int k = 0; k < mpUnits; k++)
+                    {
+                        uint mo = BitConverter.ToUInt32(mp, 0x14 + k * 4);
+                        if (mo == 0 || mo + 8 > mp.Length) continue;
+                        uint mtp = BitConverter.ToUInt32(mp, (int)mo);
+                        if (v2MpBone.TryGetValue(mtp, out uint bone)) g2.MotionPointParents.Add((mtp, bone));
+                    }
             }
             return g2;
         }
@@ -704,6 +723,7 @@ internal static class TranscodeCmd
             Console.WriteLine($"  GZ versions NOT used (already present; pass --override): {names.Count - added:N0}");
         if (syncKept > 0) Console.WriteLine($"  kept TPP clip (GZ has no foot-sync): {syncKept:N0}");
         if (motionKept > 0) Console.WriteLine($"  kept TPP clip (has motion points)  : {motionKept:N0}");
+        if (mpDropped > 0) Console.WriteLine($"  motion points dropped (malformed)  : {mpDropped:N0}");
         if (notListed > 0) Console.WriteLine($"  not in --add-only list      : {notListed:N0}");
         if (overridden > 0) Console.WriteLine($"  yielded to an explicit --map: {overridden:N0}");
         if (pairSkipped > 0) Console.WriteLine($"  skipped to keep left/right pairs together   : {pairSkipped:N0}");
