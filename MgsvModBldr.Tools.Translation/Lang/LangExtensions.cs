@@ -18,6 +18,15 @@ namespace MgsvModBldr.Tools.Translation.Lang
             return builder.ToString();
         }
 
+        // byte-wise so multi-byte utf8 cannot trip the char decoder
+        internal static string ReadNullTerminatedUtf8(this Stream stream)
+        {
+            var bytes = new System.Collections.Generic.List<byte>(64);
+            int b;
+            while ((b = stream.ReadByte()) > 0) bytes.Add((byte)b);
+            return Encoding.UTF8.GetString(bytes.ToArray());
+        }
+
         internal static void WriteNullTerminatedString(this BinaryWriter writer, string text)
         {
             byte[] data = Encoding.UTF8.GetBytes(text + '\0');

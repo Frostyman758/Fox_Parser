@@ -89,7 +89,7 @@ namespace MgsvModBldr.Tools.Mtar.Mtar
         {
             input.Position = offset;
             byte[] data = new byte[size];
-            input.Read(data, 0, size);
+            input.ReadExactly(data, 0, size);
 
             return data;
         }
@@ -97,7 +97,7 @@ namespace MgsvModBldr.Tools.Mtar.Mtar
         public byte[] ReadMotionPointData(Stream input)
         {
             byte[] data = new byte[motionPointsSize];
-            input.Read(data, 0, motionPointsSize);
+            input.ReadExactly(data, 0, motionPointsSize);
 
             return data;
         }

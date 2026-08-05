@@ -37,15 +37,15 @@ public sealed class SbpFile
         int fileCount = head[4];
         // head[5..7] = headerSize (recomputed on write), head[7] = padding.
 
+        Span<byte> entryBuf = stackalloc byte[SbpEntry.HeaderSize];
         for (int i = 0; i < fileCount; i++)
         {
-            Span<byte> e = stackalloc byte[SbpEntry.HeaderSize];
-            ReadExact(input, e);
+            ReadExact(input, entryBuf);
             Entries.Add(new SbpEntry
             {
-                Magic  = Encoding.ASCII.GetString(e.Slice(0, 4)).TrimEnd('\0'),
-                Offset = BinaryPrimitives.ReadUInt32LittleEndian(e.Slice(4, 4)),
-                Size   = BinaryPrimitives.ReadInt32LittleEndian(e.Slice(8, 4)),
+                Magic  = Encoding.ASCII.GetString(entryBuf.Slice(0, 4)).TrimEnd('\0'),
+                Offset = BinaryPrimitives.ReadUInt32LittleEndian(entryBuf.Slice(4, 4)),
+                Size   = BinaryPrimitives.ReadInt32LittleEndian(entryBuf.Slice(8, 4)),
             });
         }
 
@@ -88,9 +88,9 @@ public sealed class SbpFile
         head[7] = 0;
         output.Write(head);
 
+        Span<byte> eb = stackalloc byte[SbpEntry.HeaderSize];
         foreach (var e in Entries)
         {
-            Span<byte> eb = stackalloc byte[SbpEntry.HeaderSize];
             eb.Clear(); // magic field NUL-padded to 4 bytes
             var mb = Encoding.ASCII.GetBytes(e.Magic);
             mb.AsSpan(0, Math.Min(4, mb.Length)).CopyTo(eb.Slice(0, 4));

@@ -11,7 +11,7 @@ namespace MgsvModBldr.Tools.Twpf
     {
         [XmlAttribute]
         public string stringId;
-        public new void Read(BinaryReader reader, System.Collections.Generic.Dictionary<ulong, string> dict)
+        public void Read(BinaryReader reader, System.Collections.Generic.Dictionary<ulong, string> dict)
         {
             base.Read(reader);
             var stringIdHash = reader.ReadUInt64();

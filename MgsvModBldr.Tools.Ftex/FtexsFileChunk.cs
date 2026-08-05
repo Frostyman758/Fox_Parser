@@ -32,7 +32,7 @@ namespace MgsvModBldr.Tools.Ftex.Ftexs
         private void ReadSingleChunk(Stream inputStream, int fileSize)
         {
             byte[] chunkBuffer = new byte[fileSize];
-            inputStream.Read(chunkBuffer, 0, fileSize);
+            inputStream.ReadExactly(chunkBuffer, 0, fileSize);
             SetData(chunkBuffer, compressed: false, chunked: false);
         }
 

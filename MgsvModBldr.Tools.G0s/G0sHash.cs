@@ -57,10 +57,10 @@ public static class G0sHash
     // ─── dictionary (hash -> extension-less path) ───────────────────────────
 
     private static readonly object Lock = new();
-    private static Dictionary<ulong, string> _dict;
-    private static string _dictDir;
+    private static Dictionary<ulong, string>? _dict;
+    private static string? _dictDir;
 
-    public static string DictionaryDirectory
+    public static string? DictionaryDirectory
     {
         get => _dictDir;
         set { lock (Lock) { _dictDir = value; _dict = null; } }

@@ -21,6 +21,6 @@ namespace MgsvModBldr.Tools.Rdf
     // unchanged. Default off (no diagnostic Console spam).
     internal static class Program
     {
-        public static bool Verbose;
+        public static bool Verbose = false;
     }
 }

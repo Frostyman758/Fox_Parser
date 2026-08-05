@@ -40,9 +40,9 @@ public sealed class StreamedPackage
         var wemOff = new int[count];
         var ls2Off = new int[count];
         int entrySize = Version == StpVersion.TPP ? 12 : 8;
+        Span<byte> e = stackalloc byte[12];
         for (int i = 0; i < count; i++)
         {
-            Span<byte> e = stackalloc byte[12];
             ReadExact(input, e.Slice(0, entrySize));
             names[i]  = BinaryPrimitives.ReadUInt32LittleEndian(e.Slice(0, 4));
             wemOff[i] = BinaryPrimitives.ReadInt32LittleEndian(e.Slice(4, 4));
@@ -105,9 +105,9 @@ public sealed class StreamedPackage
         long end = output.Position;
 
         output.Position = tableStart;
+        Span<byte> e = stackalloc byte[12];
         for (int i = 0; i < count; i++)
         {
-            Span<byte> e = stackalloc byte[12];
             BinaryPrimitives.WriteUInt32LittleEndian(e.Slice(0, 4), Entries[i].Name);
             BinaryPrimitives.WriteInt32LittleEndian(e.Slice(4, 4), wemOff[i]);
             if (Version == StpVersion.TPP)
@@ -170,9 +170,9 @@ public sealed class StreamedAnimation
 
         var names = new ulong[count];
         var off = new int[count];
+        Span<byte> e = stackalloc byte[16];
         for (int i = 0; i < count; i++)
         {
-            Span<byte> e = stackalloc byte[16];
             StreamedPackage.ReadExact(input, e);
             names[i] = BinaryPrimitives.ReadUInt64LittleEndian(e.Slice(0, 8));
             off[i]   = BinaryPrimitives.ReadInt32LittleEndian(e.Slice(8, 4));
@@ -207,9 +207,9 @@ public sealed class StreamedAnimation
         long end = output.Position;
 
         output.Position = tableStart;
+        Span<byte> e = stackalloc byte[16];
         for (int i = 0; i < count; i++)
         {
-            Span<byte> e = stackalloc byte[16];
             BinaryPrimitives.WriteUInt64LittleEndian(e.Slice(0, 8), Entries[i].Name);
             BinaryPrimitives.WriteInt32LittleEndian(e.Slice(8, 4), off[i]);
             output.Write(e);

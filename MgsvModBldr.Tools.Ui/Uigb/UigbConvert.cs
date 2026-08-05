@@ -34,6 +34,7 @@ public static class UigbConvert
         foreach (var id in gz.GzIds) t.TppIds.Add((uint)id);
         foreach (var (len, s) in gz.GzPaths) t.TppPathIds.Add(len == 0 ? 0ul : GameHash.PathCode(s));
 
+        Span<byte> narrowed = stackalloc byte[16];
         foreach (var n in gz.Nodes)
         {
             var c = new UigbNode { TypeIdx = n.TypeIdx, NameIdx = n.NameIdx, Size = n.Size, Type = n.Type, Body = n.Body.ToArray() };
@@ -43,7 +44,6 @@ public static class UigbConvert
                 if (par != 0xFFFFFFFF && par + 72 <= t.Pool.Length)
                 {
                     var tail = t.Pool.AsSpan((int)par + 56, 16);
-                    Span<byte> narrowed = stackalloc byte[16];
                     for (int i = 0; i < 4; i++) narrowed[i] = tail[i * 4];   // u32 flags → u8
                     narrowed[4..].Clear();
                     narrowed.CopyTo(tail);
